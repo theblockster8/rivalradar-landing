@@ -222,15 +222,16 @@
     <div class="container container-narrow">
       <h2 class="signup-heading">Be first. Lock in $20/mo forever.</h2>
       <p class="signup-sub">Early access members get the launch price locked in for life — even when we raise prices later.</p>
-      <form class="signup-form" onsubmit="handleSubmit(event)">
-        <div class="form-row">
-          <input type="text" placeholder="Your name" name="name" required autocomplete="name" />
-          <input type="email" placeholder="Work email" name="email" required autocomplete="email" />
-        </div>
-        <input type="url" placeholder="Your Shopify store URL (e.g. yourbrand.myshopify.com)" name="store" />
-        <button type="submit" class="btn btn-primary btn-lg btn-full">Join the waitlist →</button>
-        <p class="form-note">We'll reach out personally when your account is ready. No spam, ever.</p>
-      </form>
+      <form class="signup-form" action="https://formspree.io/f/mbdvkvwg" method="POST">
+  <div class="form-row">
+    <input type="text" placeholder="Your name" name="name" required autocomplete="name" />
+    <input type="email" placeholder="Work email" name="email" required autocomplete="email" />
+  </div>
+  <input type="url" placeholder="Your Shopify store URL (e.g. yourbrand.myshopify.com)" name="store" />
+  <input type="hidden" name="_subject" value="New RivalRadar waitlist signup" />
+  <button type="submit" class="btn btn-primary btn-lg btn-full">Join the waitlist →</button>
+  <p class="form-note">We'll reach out personally when your account is ready. No spam, ever.</p>
+</form>
       <div class="signup-success" id="success-msg" style="display:none;">
         <div class="success-icon">✓</div>
         <h3>You're on the list.</h3>
