@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login – RivalRadar</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #f8f8f8;
+      --color-border: #e5e5e5;
+      --color-text: #111111;
+      --color-text-muted: #666666;
+      --color-text-faint: #aaaaaa;
+      --color-text-inverse: #ffffff;
+      --color-primary: #0f172a;
+      --color-primary-hover: #1e293b;
+      --color-accent: #2563eb;
+      --color-accent-light: #eff6ff;
+      --color-error: #dc2626;
+      --color-error-bg: #fef2f2;
+      --color-success: #16a34a;
+      --color-success-bg: #f0fdf4;
+      --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
+      --font-body: 'Satoshi', 'Inter', sans-serif;
+      --radius-md: 0.625rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.06);
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    [data-theme="dark"] {
+      --color-bg: #0a0a0a;
+      --color-surface: #141414;
+      --color-border: #262626;
+      --color-text: #f5f5f5;
+      --color-text-muted: #888888;
+      --color-text-faint: #444444;
+      --color-text-inverse: #0a0a0a;
+      --color-primary: #f5f5f5;
+      --color-primary-hover: #e5e5e5;
+      --color-accent: #3b82f6;
+      --color-accent-light: #1e293b;
+      --color-error: #f87171;
+      --color-error-bg: #2d0a0a;
+      --color-success: #22c55e;
+      --color-success-bg: #052e16;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--color-accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+      color: var(--color-text);
+      text-decoration: none;
+      margin-bottom: 1.75rem;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin: 0 0 0.35rem;
+      color: var(--color-text);
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      margin: 0 0 1.75rem;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 0.25rem;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: calc(var(--radius-md) - 2px);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .tab-btn.active {
+      background: var(--color-primary);
+      color: var(--color-text-inverse);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-faint);
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      height: 46px;
+      padding: 0 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--color-text);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 48px;
+      margin-top: 0.5rem;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--color-primary);
+      background: var(--color-primary);
+      color: var(--color-text-inverse);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .submit-btn:hover {
+      background: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .message {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .message.error {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+      border: 1px solid var(--color-error);
+      display: block;
+    }
+
+    .message.success {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid var(--color-success);
+      display: block;
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 0.8rem;
+      margin-top: 0.35rem;
+      color: var(--color-accent);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      font-size: 0.85rem;
+      margin-top: 1.25rem;
+      color: var(--color-text-faint);
+    }
+
+    .divider {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--color-text-faint);
+      margin: 1.25rem 0;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 42%;
+      height: 1px;
+      background: var(--color-border);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    #reset-panel { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <a href="/" class="logo">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="3" fill="#0f172a"/>
+        <circle cx="16" cy="16" r="7" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="3 2" fill="none" opacity="0.6"/>
+        <circle cx="16" cy="16" r="12" stroke="#0f172a" stroke-width="1" stroke-dasharray="2 3" fill="none" opacity="0.3"/>
+        <path d="M22 10L26 6" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="27" cy="5" r="2" fill="#0f172a" opacity="0.8"/>
+      </svg>
+      RivalRadar
+    </a>
+
+    <!-- Auth panel -->
+    <div id="auth-panel">
+      <h1 id="panel-title">Welcome back</h1>
+      <p class="subtitle" id="panel-subtitle">Sign in to your RivalRadar account.</p>
+
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Log in</button>
+        <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
+      </div>
+
+      <div id="msg" class="message"></div>
+
+      <form id="auth-form" onsubmit="handleAuth(event)">
+        <div class="form-group" id="name-group" style="display:none">
+          <label for="full-name">Full name</label>
+          <input type="text" id="full-name" placeholder="Jane Smith" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@yourstore.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" minlength="8" />
+          <a href="#" class="forgot-link" id="forgot-link" onclick="showReset(event)">Forgot password?</a>
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">Log in</button>
+      </form>
+
+      <a href="/" class="back-link">← Back to rivalradar.online</a>
+    </div>
+
+    <!-- Reset password panel -->
+    <div id="reset-panel">
+      <h1>Reset password</h1>
+      <p class="subtitle">We'll email you a link to reset your password.</p>
+      <div id="reset-msg" class="message"></div>
+      <form onsubmit="handleReset(event)">
+        <div class="form-group">
+          <label for="reset-email">Email</label>
+          <input type="email" id="reset-email" placeholder="you@yourstore.com" required />
+        </div>
+        <button type="submit" class="submit-btn">Send reset link</button>
+      </form>
+      <a href="#" class="back-link" onclick="showAuth(event)">← Back to login</a>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://msmlwfnzeqndwkrkpipo.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbWx3Zm56ZXFuZHdrcmtwaXBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjE2NzksImV4cCI6MjA5ODMzNzY3OX0.bU0F3glkH4LMukxkDrLEgerjUqNIGVI77zCm9c_n6ac';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentTab = 'login';
+
+    // Redirect if already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = '/dashboard.html';
+    });
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+      document.getElementById('name-group').style.display = tab === 'signup' ? 'block' : 'none';
+      document.getElementById('forgot-link').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('panel-title').textContent = tab === 'login' ? 'Welcome back' : 'Create your account';
+      document.getElementById('panel-subtitle').textContent = tab === 'login' ? 'Sign in to your RivalRadar account.' : 'Start monitoring your rivals today.';
+      document.getElementById('submit-btn').textContent = tab === 'login' ? 'Log in' : 'Create account';
+      clearMsg();
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = currentTab === 'login' ? 'Logging in...' : 'Creating account...';
+      clearMsg();
+
+      if (currentTab === 'login') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) { showMsg(error.message, 'error'); }
+        else { window.location.href = '/dashboard.html'; }
+      } else {
+        const fullName = document.getElementById('full-name').value.trim();
+        const { error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { full_name: fullName } }
+        });
+        if (error) { showMsg(error.message, 'error'); }
+        else { showMsg('Account created! Check your email to confirm, then log in.', 'success'); }
+      }
+
+      btn.disabled = false;
+      btn.textContent = currentTab === 'login' ? 'Log in' : 'Create account';
+    }
+
+    async function handleReset(e) {
+      e.preventDefault();
+      const email = document.getElementById('reset-email').value.trim();
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://rival-radar.online/dashboard.html'
+      });
+      const msg = document.getElementById('reset-msg');
+      msg.className = 'message ' + (error ? 'error' : 'success');
+      msg.textContent = error ? error.message : 'Reset link sent! Check your inbox.';
+    }
+
+    function showReset(e) { e.preventDefault(); document.getElementById('auth-panel').style.display = 'none'; document.getElementById('reset-panel').style.display = 'block'; }
+    function showAuth(e) { e.preventDefault(); document.getElementById('reset-panel').style.display = 'none'; document.getElementById('auth-panel').style.display = 'block'; }
+    function showMsg(text, type) { const m = document.getElementById('msg'); m.textContent = text; m.className = 'message ' + type; }
+    function clearMsg() { const m = document.getElementById('msg'); m.className = 'message'; m.textContent = ''; }
+  </script>
+
+</body>
+</html>
