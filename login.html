@@ -82,7 +82,6 @@
     }
     .subtitle { font-size: 0.9rem; color: var(--color-text-muted); margin: 0 0 1.75rem; }
 
-    /* Tab row */
     .tab-row {
       display: flex; gap: 0.25rem;
       background: var(--color-bg);
@@ -103,7 +102,6 @@
       color: var(--color-text-inverse);
     }
 
-    /* Form */
     .form-group { margin-bottom: 1rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
     label {
@@ -122,16 +120,12 @@
       transition: border-color var(--transition), box-shadow var(--transition);
     }
     input[type="email"], input[type="password"], input[type="text"] { height: 46px; }
-    textarea {
-      height: 90px; padding: 0.75rem 1rem;
-      resize: vertical; line-height: 1.5;
-    }
+    textarea { height: 90px; padding: 0.75rem 1rem; resize: vertical; line-height: 1.5; }
     input:focus, textarea:focus {
       border-color: var(--color-accent);
       box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
     }
     input::placeholder, textarea::placeholder { color: var(--color-text-faint); }
-
     .hint { font-size: 0.75rem; color: var(--color-text-faint); margin-top: 0.3rem; }
 
     .submit-btn {
@@ -155,7 +149,7 @@
     .forgot-link { display: block; text-align: right; font-size: 0.8rem; margin-top: 0.35rem; color: var(--color-accent); }
     .back-link { display: block; text-align: center; font-size: 0.85rem; margin-top: 1.25rem; color: var(--color-text-faint); }
 
-    #signup-form { display: none; }
+    #signup-panel { display: none; }
     #reset-panel { display: none; }
 
     @media (max-width: 480px) {
@@ -178,7 +172,7 @@
       RivalRadar
     </a>
 
-    <!-- Tab row — always visible -->
+    <!-- Tab row -->
     <div class="tab-row">
       <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Log in</button>
       <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
@@ -260,6 +254,10 @@
     const FORMSPREE_URL = 'https://formspree.io/f/mbdvkvwg';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Read ?tab= param and default to the right tab
+    const urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (urlTab === 'signup') switchTab('signup');
+
     // Redirect if already logged in
     sb.auth.getSession().then(({ data: { session } }) => {
       if (session) window.location.href = '/dashboard.html';
@@ -298,7 +296,6 @@
       btn.disabled = true; btn.textContent = 'Creating account...';
       clearMsg('signup-msg');
 
-      // 1. Create Supabase account
       const { data, error } = await sb.auth.signUp({
         email, password,
         options: {
@@ -313,31 +310,25 @@
         return;
       }
 
-      // 2. Send to Formspree (fire and forget)
+      // Send to Formspree
       try {
         await fetch(FORMSPREE_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            first_name: firstName,
-            last_name: lastName,
-            email: email,
-            rivals: rivalsRaw || 'None provided'
-          })
+          body: JSON.stringify({ first_name: firstName, last_name: lastName, email, rivals: rivalsRaw || 'None provided' })
         });
       } catch(_) {}
 
-      // 3. Save rivals to Supabase if user session exists
+      // Save rivals to Supabase
       if (data.session && rivalsRaw) {
         const userId = data.session.user.id;
         const rivalList = rivalsRaw.split(/[\n,]+/).map(r => r.trim()).filter(Boolean);
         for (const url of rivalList) {
-          let cleanUrl = url.startsWith('http') ? url : 'https://' + url;
+          const cleanUrl = url.startsWith('http') ? url : 'https://' + url;
           await sb.from('rivals').insert({ user_id: userId, store_url: cleanUrl, store_name: cleanUrl.replace(/https?:\/\//, '').split('/')[0] });
         }
       }
 
-      // 4. Redirect or show success
       if (data.session) {
         window.location.href = '/dashboard.html';
       } else {
