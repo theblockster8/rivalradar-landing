@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – RivalRadar</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #f8f8f8;
+      --color-surface-2: #f2f2f2;
+      --color-border: #e5e5e5;
+      --color-divider: #ebebeb;
+      --color-text: #111111;
+      --color-text-muted: #666666;
+      --color-text-faint: #aaaaaa;
+      --color-text-inverse: #ffffff;
+      --color-primary: #0f172a;
+      --color-primary-hover: #1e293b;
+      --color-accent: #2563eb;
+      --color-accent-light: #eff6ff;
+      --color-down: #16a34a;
+      --color-down-bg: #f0fdf4;
+      --color-up: #dc2626;
+      --color-up-bg: #fef2f2;
+      --color-new: #7c3aed;
+      --color-new-bg: #f5f3ff;
+      --color-warn: #d97706;
+      --color-warn-bg: #fffbeb;
+      --color-error: #dc2626;
+      --color-error-bg: #fef2f2;
+      --color-success: #16a34a;
+      --color-success-bg: #f0fdf4;
+      --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
+      --font-body: 'Satoshi', 'Inter', sans-serif;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.625rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.1);
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    [data-theme="dark"] {
+      --color-bg: #0a0a0a;
+      --color-surface: #141414;
+      --color-surface-2: #1a1a1a;
+      --color-border: #262626;
+      --color-divider: #1f1f1f;
+      --color-text: #f5f5f5;
+      --color-text-muted: #888888;
+      --color-text-faint: #444444;
+      --color-text-inverse: #0a0a0a;
+      --color-primary: #f5f5f5;
+      --color-primary-hover: #e5e5e5;
+      --color-accent: #3b82f6;
+      --color-accent-light: #1e293b;
+      --color-down: #22c55e;
+      --color-down-bg: #052e16;
+      --color-up: #f87171;
+      --color-up-bg: #2d0a0a;
+      --color-new: #a78bfa;
+      --color-new-bg: #1e1030;
+      --color-warn: #fbbf24;
+      --color-warn-bg: #1a1200;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100dvh;
+    }
+    h1,h2,h3,h4 { font-family: var(--font-display); margin: 0; line-height: 1.1; }
+    p { margin: 0; }
+    a { color: var(--color-accent); text-decoration: none; }
+    button { cursor: pointer; font: inherit; }
+    input, select { font: inherit; }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-divider);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 clamp(1rem, 4vw, 2.5rem);
+      min-height: 68px;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-display); font-weight: 800;
+      font-size: 1.1rem; letter-spacing: -0.03em; color: var(--color-text); text-decoration: none;
+    }
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+    .user-email { font-size: 0.8rem; color: var(--color-text-faint); }
+    .btn-sm {
+      height: 36px; padding: 0 0.9rem;
+      border-radius: var(--radius-md); border: 1px solid var(--color-border);
+      background: var(--color-bg); color: var(--color-text-muted);
+      font-family: var(--font-display); font-weight: 600; font-size: 0.8rem;
+      transition: all var(--transition);
+    }
+    .btn-sm:hover { background: var(--color-surface); color: var(--color-text); }
+    .theme-toggle {
+      width: 36px; height: 36px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: var(--radius-md); border: 1px solid var(--color-border);
+      background: var(--color-bg); color: var(--color-text-muted);
+      transition: all var(--transition);
+    }
+    .theme-toggle:hover { background: var(--color-surface); }
+
+    /* MAIN LAYOUT */
+    .main { max-width: 1200px; margin: 0 auto; padding: 2rem clamp(1rem, 4vw, 2.5rem); }
+
+    /* STATUS BANNER */
+    .status-banner {
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .status-banner.inactive { background: var(--color-warn-bg); color: var(--color-warn); border: 1px solid var(--color-warn); }
+    .status-banner.active { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); }
+
+    /* SECTION HEADER */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .section-title { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
+    .section-label {
+      font-size: 0.7rem; font-family: var(--font-display); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint);
+      margin-bottom: 0.4rem;
+    }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1.25rem;
+    }
+    .stat-value {
+      font-family: var(--font-display); font-size: 1.8rem;
+      font-weight: 800; letter-spacing: -0.04em; color: var(--color-text);
+    }
+    .stat-label { font-size: 0.8rem; color: var(--color-text-faint); margin-top: 0.2rem; }
+
+    /* CARDS */
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* RIVALS */
+    .rivals-grid { display: grid; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .rival-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: 0.9rem 1.25rem; gap: 1rem;
+    }
+    .rival-name { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; }
+    .rival-url { font-size: 0.78rem; color: var(--color-text-faint); margin-top: 0.15rem; }
+    .rival-delete {
+      width: 30px; height: 30px; border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border); background: transparent;
+      color: var(--color-text-faint); font-size: 1rem; display: flex;
+      align-items: center; justify-content: center; transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .rival-delete:hover { background: var(--color-up-bg); color: var(--color-up); border-color: var(--color-up); }
+
+    /* ADD RIVAL FORM */
+    .add-rival-form {
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .add-rival-form input {
+      flex: 1 1 200px; height: 42px; padding: 0 0.9rem;
+      border-radius: var(--radius-md); border: 1px solid var(--color-border);
+      background: var(--color-bg); color: var(--color-text); font-size: 0.875rem;
+      outline: none; transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .add-rival-form input:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+    .primary-btn {
+      height: 42px; padding: 0 1.25rem;
+      border-radius: var(--radius-md); border: 2px solid var(--color-primary);
+      background: var(--color-primary); color: var(--color-text-inverse);
+      font-family: var(--font-display); font-weight: 700; font-size: 0.875rem;
+      transition: all var(--transition); white-space: nowrap;
+    }
+    .primary-btn:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
+    .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ALERTS TABLE */
+    .alerts-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .alerts-table th {
+      text-align: left; font-family: var(--font-display); font-weight: 700;
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--color-text-faint); padding: 0 0.75rem 0.75rem; border-bottom: 1px solid var(--color-border);
+    }
+    .alerts-table td {
+      padding: 0.85rem 0.75rem; border-bottom: 1px solid var(--color-divider);
+      color: var(--color-text-muted); vertical-align: middle;
+    }
+    .alerts-table tr:last-child td { border-bottom: none; }
+    .alerts-table td strong { color: var(--color-text); font-weight: 600; }
+
+    .tag {
+      display: inline-flex; align-items: center;
+      padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);
+      font-size: 0.7rem; font-family: var(--font-display);
+      font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .tag-down { background: var(--color-down-bg); color: var(--color-down); }
+    .tag-up { background: var(--color-up-bg); color: var(--color-up); }
+    .tag-new { background: var(--color-new-bg); color: var(--color-new); }
+    .tag-inactive { background: var(--color-surface-2); color: var(--color-text-faint); }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center; padding: 3rem 1rem; color: var(--color-text-faint);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p { font-size: 0.9rem; max-width: 30ch; margin: 0 auto; }
+
+    /* LOADING */
+    .loading { color: var(--color-text-faint); font-size: 0.875rem; padding: 1.5rem 0; }
+
+    /* MSG */
+    .msg {
+      padding: 0.6rem 1rem; border-radius: var(--radius-md);
+      font-size: 0.85rem; margin-bottom: 0.75rem; display: none;
+    }
+    .msg.error { background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error); display: block; }
+    .msg.success { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); display: block; }
+
+    @media (max-width: 640px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .alerts-table th:nth-child(3), .alerts-table td:nth-child(3) { display: none; }
+      .user-email { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="3" fill="var(--color-primary)"/>
+          <circle cx="16" cy="16" r="7" stroke="var(--color-primary)" stroke-width="1.5" stroke-dasharray="3 2" fill="none" opacity="0.6"/>
+          <circle cx="16" cy="16" r="12" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="2 3" fill="none" opacity="0.3"/>
+          <path d="M22 10L26 6" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="27" cy="5" r="2" fill="var(--color-primary)" opacity="0.8"/>
+        </svg>
+        RivalRadar
+      </a>
+      <div class="nav-right">
+        <span class="user-email" id="user-email"></span>
+        <button class="btn-sm" onclick="signOut()">Sign out</button>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- Status banner -->
+    <div id="status-banner" class="status-banner inactive" style="display:none">
+      <span id="status-icon">⚠️</span>
+      <span id="status-text">Your subscription is inactive. <a href="/#pricing">Upgrade to activate monitoring →</a></span>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-rivals">-</div>
+        <div class="stat-label">Rivals monitored</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-alerts">-</div>
+        <div class="stat-label">Alerts this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-status">—</div>
+        <div class="stat-label">Account status</div>
+      </div>
+    </div>
+
+    <!-- Rivals section -->
+    <div class="section-header">
+      <div>
+        <div class="section-label">Monitoring</div>
+        <div class="section-title">Your rivals</div>
+      </div>
+    </div>
+
+    <div id="rivals-list" class="rivals-grid"><div class="loading">Loading...</div></div>
+
+    <div class="card">
+      <div class="section-label" style="margin-bottom:0.75rem">Add a rival</div>
+      <div id="rival-msg" class="msg"></div>
+      <div class="add-rival-form">
+        <input type="text" id="rival-name" placeholder="Store name (e.g. Gymshark)" />
+        <input type="url" id="rival-url" placeholder="https://gymshark.com" />
+        <button class="primary-btn" onclick="addRival()">+ Add rival</button>
+      </div>
+    </div>
+
+    <!-- Alerts section -->
+    <div class="section-header" style="margin-top:2rem">
+      <div>
+        <div class="section-label">Activity</div>
+        <div class="section-title">Recent alerts</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div id="alerts-container">
+        <div class="loading" style="padding: 1.5rem">Loading...</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://msmlwfnzeqndwkrkpipo.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbWx3Zm56ZXFuZHdrcmtwaXBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjE2NzksImV4cCI6MjA5ODMzNzY3OX0.bU0F3glkH4LMukxkDrLEgerjUqNIGVI77zCm9c_n6ac';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+    let currentProfile = null;
+
+    // Auth guard
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (!session) { window.location.href = '/login.html'; return; }
+      currentUser = session.user;
+      document.getElementById('user-email').textContent = currentUser.email;
+      loadDashboard();
+    });
+
+    async function loadDashboard() {
+      await Promise.all([loadProfile(), loadRivals(), loadAlerts()]);
+    }
+
+    async function loadProfile() {
+      const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+      currentProfile = data;
+      const status = data?.subscription_status || 'inactive';
+      const banner = document.getElementById('status-banner');
+      const statStatus = document.getElementById('stat-status');
+      if (status === 'active') {
+        banner.className = 'status-banner active';
+        banner.style.display = 'flex';
+        document.getElementById('status-icon').textContent = '✅';
+        document.getElementById('status-text').textContent = 'Monitoring is active. We\'ll email you the moment a rival changes a price.';
+        statStatus.textContent = 'Active';
+        statStatus.style.color = 'var(--color-down)';
+      } else {
+        banner.style.display = 'flex';
+        statStatus.textContent = 'Inactive';
+        statStatus.style.color = 'var(--color-warn)';
+      }
+    }
+
+    async function loadRivals() {
+      const { data, error } = await sb.from('rivals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
+      document.getElementById('stat-rivals').textContent = data?.length ?? 0;
+      const container = document.getElementById('rivals-list');
+      if (!data || data.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No rivals added yet. Add your first competitor below.</p></div>`;
+        return;
+      }
+      container.innerHTML = data.map(r => `
+        <div class="rival-row" id="rival-${r.id}">
+          <div>
+            <div class="rival-name">${esc(r.store_name || r.store_url)}</div>
+            <div class="rival-url">${esc(r.store_url)}</div>
+          </div>
+          <button class="rival-delete" onclick="deleteRival('${r.id}')" title="Remove rival">×</button>
+        </div>
+      `).join('');
+    }
+
+    async function addRival() {
+      const name = document.getElementById('rival-name').value.trim();
+      const url = document.getElementById('rival-url').value.trim();
+      const msg = document.getElementById('rival-msg');
+      msg.className = 'msg';
+      if (!url) { showMsg(msg, 'Please enter a store URL.', 'error'); return; }
+      let cleanUrl = url.startsWith('http') ? url : 'https://' + url;
+      const { error } = await sb.from('rivals').insert({ user_id: currentUser.id, store_url: cleanUrl, store_name: name || cleanUrl });
+      if (error) { showMsg(msg, error.message, 'error'); return; }
+      document.getElementById('rival-name').value = '';
+      document.getElementById('rival-url').value = '';
+      showMsg(msg, 'Rival added! They\'ll be included in your next monitoring run.', 'success');
+      loadRivals();
+    }
+
+    async function deleteRival(id) {
+      if (!confirm('Remove this rival from monitoring?')) return;
+      await sb.from('rivals').delete().eq('id', id).eq('user_id', currentUser.id);
+      loadRivals();
+    }
+
+    async function loadAlerts() {
+      const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
+      const { data } = await sb.from('alerts').select('*').eq('user_id', currentUser.id).order('detected_at', { ascending: false }).limit(50);
+      const thisMonth = (data || []).filter(a => new Date(a.detected_at) >= startOfMonth);
+      document.getElementById('stat-alerts').textContent = thisMonth.length;
+      const container = document.getElementById('alerts-container');
+      if (!data || data.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="icon">🔔</div><p>No alerts yet. They\'ll appear here once monitoring starts.</p></div>`;
+        return;
+      }
+      const tagMap = { price_down: 'tag-down', price_up: 'tag-up', new_product: 'tag-new', stock_change: 'tag-inactive' };
+      const labelMap = { price_down: '↓ Price down', price_up: '↑ Price up', new_product: 'New product', stock_change: 'Stock change' };
+      container.innerHTML = `
+        <table class="alerts-table">
+          <thead><tr>
+            <th>Product</th><th>Store</th><th>Change</th><th>Price</th><th>Date</th>
+          </tr></thead>
+          <tbody>${data.map(a => `
+            <tr>
+              <td><strong>${esc(a.product_title || '—')}</strong></td>
+              <td>${esc(a.store_name || '—')}</td>
+              <td><span class="tag ${tagMap[a.change_type] || 'tag-inactive'}">${labelMap[a.change_type] || a.change_type}</span></td>
+              <td>${a.old_price != null ? '$'+Number(a.old_price).toFixed(2)+' → ' : ''}${a.new_price != null ? '$'+Number(a.new_price).toFixed(2) : '—'}</td>
+              <td>${formatDate(a.detected_at)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    async function signOut() {
+      await sb.auth.signOut();
+      window.location.href = '/login.html';
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function showMsg(el, text, type) { el.textContent = text; el.className = 'msg ' + type; }
+  </script>
+
+</body>
+</html>
