@@ -134,9 +134,7 @@
       color: var(--color-text-inverse);
     }
 
-    .form-group {
-      margin-bottom: 1rem;
-    }
+    .form-group { margin-bottom: 1rem; }
 
     label {
       display: block;
@@ -234,24 +232,6 @@
       margin-top: 1.25rem;
       color: var(--color-text-faint);
     }
-
-    .divider {
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--color-text-faint);
-      margin: 1.25rem 0;
-      position: relative;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 42%;
-      height: 1px;
-      background: var(--color-border);
-    }
-    .divider::before { left: 0; }
-    .divider::after { right: 0; }
 
     #reset-panel { display: none; }
   </style>
@@ -357,12 +337,22 @@
         else { window.location.href = '/dashboard.html'; }
       } else {
         const fullName = document.getElementById('full-name').value.trim();
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
-          options: { data: { full_name: fullName } }
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: 'https://rival-radar.online/dashboard.html'
+          }
         });
-        if (error) { showMsg(error.message, 'error'); }
-        else { showMsg('Account created! Check your email to confirm, then log in.', 'success'); }
+        if (error) {
+          showMsg(error.message, 'error');
+        } else if (data.session) {
+          // Email confirmation is off — user is immediately logged in
+          window.location.href = '/dashboard.html';
+        } else {
+          // Email confirmation is on — ask them to check inbox
+          showMsg('Account created! Check your email to confirm your address, then log in.', 'success');
+        }
       }
 
       btn.disabled = false;
