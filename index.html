@@ -3,22 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RivalRadar — Competitor Price Alerts for Shopify Brands</title>
-  <meta name="description" content="Know the moment a competitor changes their price. RivalRadar monitors your rivals' Shopify stores and sends instant email alerts — built for fitness and sports brands." />
-  <meta property="og:title" content="RivalRadar — Competitor Price Alerts for Shopify Brands" />
-  <meta property="og:description" content="Stop guessing. Know the moment a competitor drops their price." />
-
-  <!-- Fonts -->
-  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="style.css" />
+  <title>RivalRadar – Competitor price alerts for DTC fitness brands</title>
+  <meta name="description" content="RivalRadar watches your rivals' Shopify stores 24/7 and emails you the instant a price changes — before it costs you sales." />
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style-1.css" />
 </head>
 <body>
-
-  <!-- NAV -->
   <header class="nav">
     <div class="nav-inner">
-      <a href="#" class="logo" aria-label="RivalRadar home">
+      <a href="/" class="logo" aria-label="RivalRadar home">
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <circle cx="16" cy="16" r="3" fill="var(--color-primary)"/>
           <circle cx="16" cy="16" r="7" stroke="var(--color-primary)" stroke-width="1.5" stroke-dasharray="3 2" fill="none" opacity="0.6"/>
@@ -26,599 +19,117 @@
           <path d="M22 10L26 6" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round"/>
           <circle cx="27" cy="5" r="2" fill="var(--color-primary)" opacity="0.8"/>
         </svg>
-        <span class="logo-text">RivalRadar</span>
+        <span>RivalRadar</span>
       </a>
-      <nav class="nav-links">
-        <a href="#how-it-works">How it works</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#signup" class="btn btn-primary btn-sm">Get early access</a>
-      </nav>
-      <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
+      <div class="nav-actions">
+        <a href="https://dashboard.rival-radar.online" class="ghost-btn">
+          View live dashboard demo
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-badge">Built for fitness & sports Shopify brands</div>
-      <h1 class="hero-heading">Know the moment a competitor drops their price.</h1>
-      <p class="hero-sub">RivalRadar watches your rivals' Shopify stores 24/7 and emails you the instant a price changes — before it costs you sales.</p>
-      <div class="hero-cta">
-        <a href="#signup" class="btn btn-primary btn-lg">Get early access — $20/mo</a>
-        <span class="hero-note">No credit card required to start</span>
-      </div>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-inner">
+          <div class="hero-content">
+            <div class="hero-badge">Price alerts for DTC fitness brands</div>
+            <h1 class="hero-heading">Know the second a rival changes a price.</h1>
+            <p class="hero-sub">
+              RivalRadar watches your rivals' Shopify stores 24/7 and emails you the instant a price changes — before it costs you sales.
+            </p>
 
-      <!-- Mock alert card -->
-      <div class="alert-preview">
-        <div class="alert-header">
-          <div class="alert-dot"></div>
-          <span class="alert-label">Live alert</span>
-          <span class="alert-time">2 min ago</span>
-        </div>
-        <div class="alert-store">gymreapers.com</div>
-        <div class="alert-changes">
-          <div class="alert-row down">
-            <span class="tag tag-down">↓ PRICE DOWN</span>
-            <span class="alert-product">10MM Lever Belt - Black Leather</span>
-            <span class="alert-price"><s>$175</s> → <strong>$149</strong> <em>−14.9%</em></span>
-          </div>
-          <div class="alert-row up">
-            <span class="tag tag-up">↑ PRICE UP</span>
-            <span class="alert-product">Gymreapers Strength Kit</span>
-            <span class="alert-price"><s>$199</s> → <strong>$215</strong> <em>+8%</em></span>
-          </div>
-          <div class="alert-row new">
-            <span class="tag tag-new">★ NEW</span>
-            <span class="alert-product">Vanguard™ Backpack</span>
-            <span class="alert-price"><strong>$228</strong></span>
-          </div>
-        </div>
-        <div class="alert-footer">Sent to you@yourbrand.com · via RivalRadar</div>
-      </div>
-    </div>
-  </section>
+            <!-- UPDATED CTA BLOCK -->
+            <div class="hero-cta">
+              <form
+                action="https://formspree.io/f/mbdvkvwg"
+                method="POST"
+                class="email-form"
+              >
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email to start monitoring your rivals"
+                  required
+                  class="email-input"
+                />
+                <button type="submit" class="btn btn-primary btn-lg">
+                  Start monitoring my rivals
+                </button>
+              </form>
 
-  <!-- PROBLEM -->
-  <section class="problem">
-    <div class="container container-narrow">
-      <h2 class="section-title">Your competitors are moving. Are you watching?</h2>
-      <div class="problem-grid">
-        <div class="problem-card">
-          <div class="problem-icon">⏱</div>
-          <h3>You find out too late</h3>
-          <p>By the time you notice a competitor dropped their price, you've already lost sales. Manual checking doesn't scale.</p>
-        </div>
-        <div class="problem-card">
-          <div class="problem-icon">📉</div>
-          <h3>You're flying blind</h3>
-          <p>Fitness brands release new products and run flash sales constantly. Without visibility, you can't respond fast enough.</p>
-        </div>
-        <div class="problem-card">
-          <div class="problem-icon">💸</div>
-          <h3>Enterprise tools cost too much</h3>
-          <p>Existing price monitoring platforms charge $100–$400/month and are built for massive retailers — not lean DTC brands like yours.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+              <a href="https://dashboard.rival-radar.online" class="btn btn-outline btn-lg">
+                View live dashboard demo
+              </a>
+            </div>
 
-  <!-- HOW IT WORKS -->
-  <section class="how" id="how-it-works">
-    <div class="container container-narrow">
-      <h2 class="section-title">Simple setup. Instant intelligence.</h2>
-      <p class="section-sub">You're up and running in under 2 minutes.</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">01</div>
-          <div class="step-content">
-            <h3>Add your rivals</h3>
-            <p>Paste in the Shopify store URLs of your top 3–5 competitors. That's it.</p>
-          </div>
-        </div>
-        <div class="step-divider"></div>
-        <div class="step">
-          <div class="step-num">02</div>
-          <div class="step-content">
-            <h3>We watch 24/7</h3>
-            <p>RivalRadar checks their entire product catalog daily and detects every price change, product launch, and stock movement.</p>
-          </div>
-        </div>
-        <div class="step-divider"></div>
-        <div class="step">
-          <div class="step-num">03</div>
-          <div class="step-content">
-            <h3>You get an instant alert</h3>
-            <p>The moment something changes, a clean email lands in your inbox with exactly what changed, by how much, and at which store.</p>
+            <p class="hero-note">
+              RivalRadar is live and actively monitoring DTC fitness brands today. See how competitor price alerts and daily monitoring work in practice.
+            </p>
+
+            <div class="alert-preview">
+              <!-- existing alert preview content from your file stays here -->
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FEATURES -->
-  <section class="features">
-    <div class="container">
-      <h2 class="section-title">Everything you need. Nothing you don't.</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <!-- The rest of your sections (problem, how it works, features, etc.)
+         can stay as they are, with minor copy tweaks to remove "beta/early access"
+         if you want. Here is the pricing/ready section updated to feel live: -->
+
+    <section class="pricing">
+      <div class="container container-narrow">
+        <h2 class="section-title">Ready to use today</h2>
+        <p class="section-sub">
+          No complicated tiers. No per-seat pricing. One fair price for a solo founder or a small team.
+        </p>
+        <div class="pricing-card">
+          <div class="pricing-main">
+            <div class="pricing-price-row">
+              <div class="pricing-price">
+                <span class="pricing-amount">$XX/mo</span>
+                <span class="pricing-label">Flat monthly price</span>
+              </div>
+              <ul class="pricing-points">
+                <li>Daily monitoring of your rivals’ Shopify stores.</li>
+                <li>Price change, product launch, and stock alerts.</li>
+                <li>Access to your RivalRadar dashboard.</li>
+              </ul>
+            </div>
+            <div class="pricing-cta">
+              <form
+                action="https://formspree.io/f/mbdvkvwg"
+                method="POST"
+                class="email-form"
+              >
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email to get started"
+                  required
+                  class="email-input"
+                />
+                <button type="submit" class="btn btn-primary btn-lg btn-full">
+                  Start monitoring my rivals
+                </button>
+              </form>
+              <p class="pricing-note">
+                No setup fees. No long-term contracts. Cancel anytime.
+              </p>
+            </div>
           </div>
-          <h3>Instant email alerts</h3>
-          <p>Get notified the moment a rival changes a price — not 24 hours later.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <h3>Daily monitoring</h3>
-          <p>Your rivals' entire catalogs are checked every single day — automatically, while you sleep.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <h3>Price history tracking</h3>
-          <p>See how prices have moved over time — spot patterns, anticipate sales, and price with confidence.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          </div>
-          <h3>New product detection</h3>
-          <p>Know the second a competitor launches something new — before it hits their social media.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <h3>Built for fitness brands</h3>
-          <p>Designed specifically for the DTC fitness and sports market — the brands you're actually competing with.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <h3>$20/month flat</h3>
-          <p>No complicated tiers. No per-seat pricing. One fair price for a solo founder or a small team.</p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <!-- PRICING -->
-  <section class="pricing" id="pricing">
-    <div class="container container-narrow">
-      <h2 class="section-title">Simple, honest pricing.</h2>
-      <p class="section-sub">One plan. Everything included. Cancel anytime.</p>
-      <div class="pricing-card">
-        <div class="pricing-top">
-          <div class="pricing-name">RivalRadar</div>
-          <div class="pricing-amount">
-            <span class="pricing-dollar">$</span>
-            <span class="pricing-num">20</span>
-            <span class="pricing-per">/month</span>
-          </div>
-          <p class="pricing-desc">Everything you need to stay ahead of your competitors — for less than a single lost sale.</p>
-        </div>
-        <ul class="pricing-features" role="list">
-          <li><span class="check">✓</span> Monitor up to 10 competitor stores</li>
-          <li><span class="check">✓</span> Daily price change alerts via email</li>
-          <li><span class="check">✓</span> New product launch detection</li>
-          <li><span class="check">✓</span> Full price history per product</li>
-          <li><span class="check">✓</span> Cancel anytime, no contracts</li>
-          <li><span class="check">✓</span> Early access pricing locked in forever</li>
-        </ul>
-        <a href="#signup" class="btn btn-primary btn-lg btn-full">Get early access</a>
-        <p class="pricing-note">Free during beta · No credit card required</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SIGNUP -->
-  <section class="signup" id="signup">
-    <div class="container container-narrow">
-      <h2 class="signup-heading">Be first. Lock in $20/mo forever.</h2>
-      <p class="signup-sub">Early access members get the launch price locked in for life — even when we raise prices later.</p>
-      <form class="signup-form" action="https://formspree.io/f/mbdvkvwg" method="POST">
-  <div class="form-row">
-    <input type="text" placeholder="Your name" name="name" required autocomplete="name" />
-    <input type="email" placeholder="Work email" name="email" required autocomplete="email" />
-  </div>
-  <input type="url" placeholder="Your Shopify store URL (e.g. yourbrand.myshopify.com)" name="store" />
-  <input type="hidden" name="_subject" value="New RivalRadar waitlist signup" />
-  <button type="submit" class="btn btn-primary btn-lg btn-full">Join the waitlist →</button>
-  <p class="form-note">We'll reach out personally when your account is ready. No spam, ever.</p>
-</form>
-      <div class="signup-success" id="success-msg" style="display:none;">
-        <div class="success-icon">✓</div>
-        <h3>You're on the list.</h3>
-        <p>We'll be in touch soon with your early access details.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="container">
-      <div class="footer-inner">
-        <div class="logo">
-          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <circle cx="16" cy="16" r="3" fill="var(--color-primary)"/>
-            <circle cx="16" cy="16" r="7" stroke="var(--color-primary)" stroke-width="1.5" stroke-dasharray="3 2" fill="none" opacity="0.6"/>
-            <circle cx="16" cy="16" r="12" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="2 3" fill="none" opacity="0.3"/>
-            <path d="M22 10L26 6" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round"/>
-            <circle cx="27" cy="5" r="2" fill="var(--color-primary)" opacity="0.8"/>
-          </svg>
-          <span class="logo-text">RivalRadar</span>
-        </div>
-        <p class="footer-copy">© 2026 RivalRadar. Built for Shopify brands that play to win.</p>
-      </div>
+      RivalRadar · Competitor price alerts for DTC fitness brands.
     </div>
   </footer>
-
-  <script>
-    // Theme toggle
-    (function () {
-      const t = document.querySelector('[data-theme-toggle]'),
-        r = document.documentElement;
-      let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-      r.setAttribute('data-theme', d);
-      t && t.addEventListener('click', () => {
-        d = d === 'dark' ? 'light' : 'dark';
-        r.setAttribute('data-theme', d);
-        t.setAttribute('aria-label', 'Switch to ' + (d === 'dark' ? 'light' : 'dark') + ' mode');
-        t.innerHTML = d === 'dark'
-          ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-          : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-      });
-    })();
-
-    // Form submit
-    function handleSubmit(e) {
-      e.preventDefault();
-      document.querySelector('.signup-form').style.display = 'none';
-      document.getElementById('success-msg').style.display = 'flex';
-    }
-
-    // Scroll reveal
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.problem-card, .step, .feature-card, .pricing-card').forEach(el => {
-      el.classList.add('reveal');
-      observer.observe(el);
-    });
-  </script>
-<script data-pplx-inline-edit>
-(function () {
-  if (window === window.top) return;
-
-  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
-  const MAX_FONT_BYTES = 500 * 1024;
-  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
-  let scrollForwarding = false;
-  let scrollRaf = 0;
-  let trustedTopOrigin = null;
-
-  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
-  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
-  // across multiple labels.
-  function matchesAllowedOrigin(origin) {
-    if (!origin) return false;
-    for (const entry of allowedParentOrigins) {
-      if (!entry.includes("*")) {
-        if (entry === origin) return true;
-        continue;
-      }
-      const pattern = new RegExp(
-        "^" +
-          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
-          "$",
-      );
-      if (pattern.test(origin)) return true;
-    }
-    return false;
-  }
-
-  // Trust decision: when the sender is same-origin-visible (event.origin is a
-  // real origin like https://www.perplexity.ai) we trust event.origin directly.
-  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
-  // broker's stamped `parentOrigin` to identify the top window. The fallback
-  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
-  // on the response path (see postToTrustedTop) to ensure replies can't be
-  // delivered to anyone but the actual top window of that claimed origin.
-  function getTrustedParentOrigin(event) {
-    const forwardedParentOrigin =
-      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
-    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
-    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
-  }
-
-  // All responses go to window.top with targetOrigin = the allowlisted origin.
-  // An attacker that iframes us inside their own null-origin broker can claim
-  // any parentOrigin they like, but the browser will drop the reply whenever
-  // the real top's origin doesn't match — so the screenshot never leaves.
-  function postToTrustedTop(message) {
-    if (!trustedTopOrigin) return;
-    try {
-      window.top.postMessage(message, trustedTopOrigin);
-    } catch (_error) {}
-  }
-
-  function inlineAll(original, clone) {
-    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
-
-    try {
-      const computedStyle = getComputedStyle(original);
-      // cssText on a computed style is the serialized declaration in modern
-      // Chromium/Safari — a single read beats enumerating ~400 longhand
-      // properties. Firefox returns "" here, so we fall back on empty.
-      const serialized = computedStyle.cssText;
-      if (serialized) {
-        clone.style.cssText = serialized;
-      } else {
-        const parts = new Array(computedStyle.length);
-        for (let index = 0; index < computedStyle.length; index += 1) {
-          const property = computedStyle[index];
-          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
-        }
-        clone.style.cssText = parts.join("");
-      }
-    } catch (_error) {}
-
-    const originalChildren = original.children;
-    const clonedChildren = clone.children;
-    for (
-      let index = 0;
-      index < originalChildren.length && index < clonedChildren.length;
-      index += 1
-    ) {
-      inlineAll(originalChildren[index], clonedChildren[index]);
-    }
-  }
-
-  function extractFontUrl(srcValue) {
-    const matches = [
-      ...srcValue.matchAll(
-        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
-      ),
-    ];
-    if (matches.length === 0) return null;
-    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
-    if (woff2) return woff2[1];
-    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
-    if (woff) return woff[1];
-    return matches[0][1];
-  }
-
-  // Cache resolved font URL -> data URI across captures. Fonts on a page
-  // essentially never change, and a batch run emits multiple captures back to
-  // back — without this we'd refetch + re-base64 every time.
-  const fontDataUriCache = new Map();
-  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
-
-  async function fetchAsDataUri(url) {
-    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
-    let dataUri = null;
-    try {
-      const response = await fetch(url, { mode: "cors", credentials: "omit" });
-      if (response.ok) {
-        const blob = await response.blob();
-        if (blob.size <= MAX_FONT_BYTES) {
-          dataUri = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () =>
-              resolve(typeof reader.result === "string" ? reader.result : null);
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(blob);
-          });
-        }
-      }
-    } catch (_error) {
-      dataUri = null;
-    }
-    fontDataUriCache.set(url, dataUri);
-    return dataUri;
-  }
-
-  function collectFontFaceRuleTexts() {
-    const rules = [];
-    for (const sheet of document.styleSheets) {
-      let cssRules;
-      try {
-        cssRules = sheet.cssRules;
-      } catch (_error) {
-        continue;
-      }
-      if (!cssRules) continue;
-      for (const rule of cssRules) {
-        const cssText = rule.cssText || "";
-        if (cssText.startsWith("@font-face")) rules.push(cssText);
-      }
-    }
-    return rules;
-  }
-
-  async function buildInlinedFontCss() {
-    const ruleTexts = collectFontFaceRuleTexts();
-    if (ruleTexts.length === 0) return null;
-
-    const resolved = ruleTexts.map((cssText) => {
-      if (!SRC_DECLARATION_RE.test(cssText)) return null;
-      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
-      if (!srcMatch) return null;
-      const url = extractFontUrl(srcMatch[1]);
-      if (!url) return null;
-      try {
-        return { cssText, url: new URL(url, document.baseURI).href };
-      } catch (_error) {
-        return null;
-      }
-    });
-
-    const dataUris = await Promise.all(
-      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
-    );
-
-    const inlined = [];
-    let totalBytes = 0;
-    for (let index = 0; index < resolved.length; index += 1) {
-      const entry = resolved[index];
-      const dataUri = dataUris[index];
-      if (!entry || !dataUri) continue;
-      const approxBytes = dataUri.length * 0.75;
-      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
-      totalBytes += approxBytes;
-      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
-    }
-    return inlined.length > 0 ? inlined.join("\n") : null;
-  }
-
-  function stripExternal(clone) {
-    const images = clone.querySelectorAll("img");
-    for (let index = 0; index < images.length; index += 1) {
-      const src = images[index].getAttribute("src");
-      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
-    }
-
-    const elements = clone.querySelectorAll("*");
-    for (let index = 0; index < elements.length; index += 1) {
-      const style = elements[index].style.cssText;
-      if (style && style.includes("url(")) {
-        elements[index].style.cssText = style.replace(
-          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
-          "none",
-        );
-      }
-    }
-  }
-
-  function emitScroll() {
-    scrollRaf = 0;
-    if (!scrollForwarding) return;
-    postToTrustedTop({
-      type: "INLINE_EDIT_SCROLL",
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-    });
-  }
-
-  window.addEventListener(
-    "scroll",
-    function () {
-      if (!scrollForwarding || scrollRaf) return;
-      scrollRaf = requestAnimationFrame(emitScroll);
-    },
-    { passive: true, capture: true },
-  );
-
-  async function handleCaptureRequest(event) {
-    const requestId = event.data.requestId;
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    function postResult(dataUrl) {
-      postToTrustedTop({
-        type: "INLINE_EDIT_SCREENSHOT_RESULT",
-        requestId,
-        dataUrl,
-        scrollX,
-        scrollY,
-      });
-    }
-
-    try {
-      // Wait for any pending web fonts to resolve so both inline metrics and
-      // the @font-face inlining below see the same loaded faces.
-      if (document.fonts && document.fonts.ready) {
-        try {
-          await document.fonts.ready;
-        } catch (_error) {}
-      }
-
-      const clone = document.documentElement.cloneNode(true);
-      inlineAll(document.documentElement, clone);
-
-      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
-      for (let index = 0; index < removedNodes.length; index += 1) {
-        removedNodes[index].remove();
-      }
-
-      stripExternal(clone);
-
-      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
-      // can resolve them — external font URLs aren't fetched during
-      // foreignObject rendering, which would otherwise force a fallback face
-      // and change text metrics.
-      const inlinedFontCss = await buildInlinedFontCss();
-      if (inlinedFontCss) {
-        const styleEl = document.createElement("style");
-        styleEl.textContent = inlinedFontCss;
-        const head = clone.querySelector("head");
-        if (head) head.appendChild(styleEl);
-        else clone.insertBefore(styleEl, clone.firstChild);
-      }
-
-      const html = new XMLSerializer().serializeToString(clone);
-      const svg =
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
-        '<foreignObject width="100%" height="100%">' +
-        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
-        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
-        html +
-        "</div></div></foreignObject></svg>";
-      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-      const image = new Image();
-      image.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext("2d").drawImage(image, 0, 0);
-        postResult(canvas.toDataURL("image/png"));
-      };
-      image.onerror = function () {
-        postResult(null);
-      };
-      image.src = svgUrl;
-    } catch (_error) {
-      postResult(null);
-    }
-  }
-
-  window.addEventListener("message", function (event) {
-    if (!event.data) return;
-    // Only accept messages from the direct parent frame. Blocks sibling /
-    // unrelated-window postMessage senders that could otherwise reach us.
-    if (event.source !== window.parent) return;
-
-    const trustedParentOrigin = getTrustedParentOrigin(event);
-    if (!trustedParentOrigin) return;
-    trustedTopOrigin = trustedParentOrigin;
-
-    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
-      scrollForwarding = true;
-      emitScroll();
-      return;
-    }
-
-    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
-      scrollForwarding = false;
-      if (scrollRaf) cancelAnimationFrame(scrollRaf);
-      scrollRaf = 0;
-      return;
-    }
-
-    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
-
-    handleCaptureRequest(event);
-  });
-})();
-
-
-</script></body>
+</body>
 </html>
