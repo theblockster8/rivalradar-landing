@@ -18,7 +18,6 @@
       --color-primary: #0f172a;
       --color-primary-hover: #1e293b;
       --color-accent: #2563eb;
-      --color-accent-light: #eff6ff;
       --color-error: #dc2626;
       --color-error-bg: #fef2f2;
       --color-success: #16a34a;
@@ -28,7 +27,6 @@
       --radius-md: 0.625rem;
       --radius-lg: 1rem;
       --radius-xl: 1.5rem;
-      --radius-full: 9999px;
       --shadow-lg: 0 16px 48px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.06);
       --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -43,26 +41,19 @@
       --color-primary: #f5f5f5;
       --color-primary-hover: #e5e5e5;
       --color-accent: #3b82f6;
-      --color-accent-light: #1e293b;
       --color-error: #f87171;
       --color-error-bg: #2d0a0a;
       --color-success: #22c55e;
       --color-success-bg: #052e16;
     }
     *, *::before, *::after { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      min-height: 100dvh;
+      margin: 0; min-height: 100dvh;
       font-family: var(--font-body);
-      background: var(--color-bg);
-      color: var(--color-text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-      -webkit-font-smoothing: antialiased;
+      background: var(--color-bg); color: var(--color-text);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 1.5rem; -webkit-font-smoothing: antialiased;
     }
     a { color: var(--color-accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
@@ -73,174 +64,111 @@
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-lg);
       padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 420px;
+      width: 100%; max-width: 460px;
     }
 
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 1.25rem;
-      letter-spacing: -0.03em;
-      color: var(--color-text);
-      text-decoration: none;
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-display); font-weight: 800;
+      font-size: 1.2rem; letter-spacing: -0.03em;
+      color: var(--color-text); text-decoration: none;
       margin-bottom: 1.75rem;
     }
 
     h1 {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin: 0 0 0.35rem;
-      color: var(--color-text);
+      font-family: var(--font-display); font-size: 1.6rem;
+      font-weight: 800; letter-spacing: -0.03em;
+      margin: 0 0 0.35rem; color: var(--color-text);
     }
+    .subtitle { font-size: 0.9rem; color: var(--color-text-muted); margin: 0 0 1.75rem; }
 
-    .subtitle {
-      font-size: 0.9rem;
-      color: var(--color-text-muted);
-      margin: 0 0 1.75rem;
-    }
-
+    /* Tab row */
     .tab-row {
-      display: flex;
-      gap: 0.25rem;
+      display: flex; gap: 0.25rem;
       background: var(--color-bg);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-md);
-      padding: 0.25rem;
-      margin-bottom: 1.5rem;
+      padding: 0.25rem; margin-bottom: 1.5rem;
     }
-
     .tab-btn {
-      flex: 1;
-      height: 36px;
-      border: none;
+      flex: 1; height: 36px; border: none;
       background: transparent;
       border-radius: calc(var(--radius-md) - 2px);
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 0.875rem;
-      color: var(--color-text-muted);
-      cursor: pointer;
-      transition: all var(--transition);
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 0.875rem; color: var(--color-text-muted);
+      cursor: pointer; transition: all var(--transition);
     }
-
     .tab-btn.active {
       background: var(--color-primary);
       color: var(--color-text-inverse);
     }
 
+    /* Form */
     .form-group { margin-bottom: 1rem; }
-
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
     label {
-      display: block;
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--color-text-faint);
-      margin-bottom: 0.4rem;
+      display: block; font-family: var(--font-display);
+      font-weight: 700; font-size: 0.78rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--color-text-faint); margin-bottom: 0.4rem;
     }
-
-    input[type="email"],
-    input[type="password"],
-    input[type="text"] {
-      width: 100%;
-      height: 46px;
-      padding: 0 1rem;
+    input[type="email"], input[type="password"], input[type="text"], textarea {
+      width: 100%; padding: 0 1rem;
       border-radius: var(--radius-md);
       border: 1px solid var(--color-border);
       background: var(--color-bg);
-      font-family: var(--font-body);
-      font-size: 0.95rem;
-      color: var(--color-text);
+      font-family: var(--font-body); font-size: 0.95rem;
+      color: var(--color-text); outline: none;
       transition: border-color var(--transition), box-shadow var(--transition);
-      outline: none;
     }
-
-    input:focus {
+    input[type="email"], input[type="password"], input[type="text"] { height: 46px; }
+    textarea {
+      height: 90px; padding: 0.75rem 1rem;
+      resize: vertical; line-height: 1.5;
+    }
+    input:focus, textarea:focus {
       border-color: var(--color-accent);
       box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
     }
+    input::placeholder, textarea::placeholder { color: var(--color-text-faint); }
+
+    .hint { font-size: 0.75rem; color: var(--color-text-faint); margin-top: 0.3rem; }
 
     .submit-btn {
-      width: 100%;
-      height: 48px;
-      margin-top: 0.5rem;
+      width: 100%; height: 48px; margin-top: 0.5rem;
       border-radius: var(--radius-md);
       border: 2px solid var(--color-primary);
-      background: var(--color-primary);
-      color: var(--color-text-inverse);
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all var(--transition);
+      background: var(--color-primary); color: var(--color-text-inverse);
+      font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+      cursor: pointer; transition: all var(--transition);
     }
-
-    .submit-btn:hover {
-      background: var(--color-primary-hover);
-      border-color: var(--color-primary-hover);
-      transform: translateY(-1px);
-    }
-
-    .submit-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .submit-btn:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
     .message {
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius-md);
-      font-size: 0.875rem;
-      margin-bottom: 1rem;
-      display: none;
+      padding: 0.75rem 1rem; border-radius: var(--radius-md);
+      font-size: 0.875rem; margin-bottom: 1rem; display: none;
     }
+    .message.error { background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error); display: block; }
+    .message.success { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); display: block; }
 
-    .message.error {
-      background: var(--color-error-bg);
-      color: var(--color-error);
-      border: 1px solid var(--color-error);
-      display: block;
-    }
+    .forgot-link { display: block; text-align: right; font-size: 0.8rem; margin-top: 0.35rem; color: var(--color-accent); }
+    .back-link { display: block; text-align: center; font-size: 0.85rem; margin-top: 1.25rem; color: var(--color-text-faint); }
 
-    .message.success {
-      background: var(--color-success-bg);
-      color: var(--color-success);
-      border: 1px solid var(--color-success);
-      display: block;
-    }
-
-    .forgot-link {
-      display: block;
-      text-align: right;
-      font-size: 0.8rem;
-      margin-top: 0.35rem;
-      color: var(--color-accent);
-    }
-
-    .back-link {
-      display: block;
-      text-align: center;
-      font-size: 0.85rem;
-      margin-top: 1.25rem;
-      color: var(--color-text-faint);
-    }
-
+    #signup-form { display: none; }
     #reset-panel { display: none; }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .card { padding: 2rem 1.25rem; }
+    }
   </style>
 </head>
 <body>
 
   <div class="card">
     <a href="/" class="logo">
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
         <circle cx="16" cy="16" r="3" fill="#0f172a"/>
         <circle cx="16" cy="16" r="7" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="3 2" fill="none" opacity="0.6"/>
         <circle cx="16" cy="16" r="12" stroke="#0f172a" stroke-width="1" stroke-dasharray="2 3" fill="none" opacity="0.3"/>
@@ -250,42 +178,68 @@
       RivalRadar
     </a>
 
-    <!-- Auth panel -->
-    <div id="auth-panel">
-      <h1 id="panel-title">Welcome back</h1>
-      <p class="subtitle" id="panel-subtitle">Sign in to your RivalRadar account.</p>
-
-      <div class="tab-row">
-        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Log in</button>
-        <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
-      </div>
-
-      <div id="msg" class="message"></div>
-
-      <form id="auth-form" onsubmit="handleAuth(event)">
-        <div class="form-group" id="name-group" style="display:none">
-          <label for="full-name">Full name</label>
-          <input type="text" id="full-name" placeholder="Jane Smith" autocomplete="name" />
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" placeholder="you@yourstore.com" required autocomplete="email" />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" minlength="8" />
-          <a href="#" class="forgot-link" id="forgot-link" onclick="showReset(event)">Forgot password?</a>
-        </div>
-        <button type="submit" class="submit-btn" id="submit-btn">Log in</button>
-      </form>
-
-      <a href="/" class="back-link">← Back to rivalradar.online</a>
+    <!-- Tab row — always visible -->
+    <div class="tab-row">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Log in</button>
+      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
     </div>
 
-    <!-- Reset password panel -->
+    <!-- LOGIN FORM -->
+    <div id="login-panel">
+      <h1>Welcome back</h1>
+      <p class="subtitle">Sign in to your RivalRadar account.</p>
+      <div id="login-msg" class="message"></div>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="you@yourstore.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required minlength="8" autocomplete="current-password" />
+          <a href="#" class="forgot-link" onclick="showReset(event)">Forgot password?</a>
+        </div>
+        <button type="submit" class="submit-btn" id="login-btn">Log in</button>
+      </form>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signup-panel" style="display:none">
+      <h1>Create your account</h1>
+      <p class="subtitle">Start monitoring your rivals in under 2 minutes.</p>
+      <div id="signup-msg" class="message"></div>
+      <form onsubmit="handleSignup(event)">
+        <div class="form-row">
+          <div>
+            <label for="first-name">First name</label>
+            <input type="text" id="first-name" placeholder="Jane" required autocomplete="given-name" />
+          </div>
+          <div>
+            <label for="last-name">Last name</label>
+            <input type="text" id="last-name" placeholder="Smith" required autocomplete="family-name" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" placeholder="you@yourstore.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label for="rivals-input">Rivals to track</label>
+          <textarea id="rivals-input" placeholder="e.g. gymshark.com, alphalete.com, rogue.com — one per line or comma-separated"></textarea>
+          <div class="hint">Paste the Shopify store URLs of your top competitors. You can add more later.</div>
+        </div>
+        <button type="submit" class="submit-btn" id="signup-btn">Create account →</button>
+      </form>
+    </div>
+
+    <!-- RESET PANEL -->
     <div id="reset-panel">
       <h1>Reset password</h1>
-      <p class="subtitle">We'll email you a link to reset your password.</p>
+      <p class="subtitle">We'll email you a reset link.</p>
       <div id="reset-msg" class="message"></div>
       <form onsubmit="handleReset(event)">
         <div class="form-group">
@@ -294,86 +248,127 @@
         </div>
         <button type="submit" class="submit-btn">Send reset link</button>
       </form>
-      <a href="#" class="back-link" onclick="showAuth(event)">← Back to login</a>
+      <a href="#" class="back-link" onclick="showLogin(event)">← Back to login</a>
     </div>
+
+    <a href="/" class="back-link" id="home-link">← Back to rivalradar.online</a>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://msmlwfnzeqndwkrkpipo.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbWx3Zm56ZXFuZHdrcmtwaXBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjE2NzksImV4cCI6MjA5ODMzNzY3OX0.bU0F3glkH4LMukxkDrLEgerjUqNIGVI77zCm9c_n6ac';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let currentTab = 'login';
+    const FORMSPREE_URL = 'https://formspree.io/f/mbdvkvwg';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Redirect if already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    sb.auth.getSession().then(({ data: { session } }) => {
       if (session) window.location.href = '/dashboard.html';
     });
 
     function switchTab(tab) {
-      currentTab = tab;
-      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-      document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
-      document.getElementById('name-group').style.display = tab === 'signup' ? 'block' : 'none';
-      document.getElementById('forgot-link').style.display = tab === 'login' ? 'block' : 'none';
-      document.getElementById('panel-title').textContent = tab === 'login' ? 'Welcome back' : 'Create your account';
-      document.getElementById('panel-subtitle').textContent = tab === 'login' ? 'Sign in to your RivalRadar account.' : 'Start monitoring your rivals today.';
-      document.getElementById('submit-btn').textContent = tab === 'login' ? 'Log in' : 'Create account';
-      clearMsg();
+      const isLogin = tab === 'login';
+      document.getElementById('tab-login').classList.toggle('active', isLogin);
+      document.getElementById('tab-signup').classList.toggle('active', !isLogin);
+      document.getElementById('login-panel').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('signup-panel').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('reset-panel').style.display = 'none';
+      document.getElementById('home-link').style.display = 'block';
     }
 
-    async function handleAuth(e) {
+    async function handleLogin(e) {
       e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.textContent = currentTab === 'login' ? 'Logging in...' : 'Creating account...';
-      clearMsg();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true; btn.textContent = 'Logging in...';
+      clearMsg('login-msg');
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) { showMsg('login-msg', error.message, 'error'); btn.disabled = false; btn.textContent = 'Log in'; }
+      else { window.location.href = '/dashboard.html'; }
+    }
 
-      if (currentTab === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) { showMsg(error.message, 'error'); }
-        else { window.location.href = '/dashboard.html'; }
-      } else {
-        const fullName = document.getElementById('full-name').value.trim();
-        const { data, error } = await supabase.auth.signUp({
-          email, password,
-          options: {
-            data: { full_name: fullName },
-            emailRedirectTo: 'https://rival-radar.online/dashboard.html'
-          }
+    async function handleSignup(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('first-name').value.trim();
+      const lastName = document.getElementById('last-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const rivalsRaw = document.getElementById('rivals-input').value.trim();
+      const btn = document.getElementById('signup-btn');
+      btn.disabled = true; btn.textContent = 'Creating account...';
+      clearMsg('signup-msg');
+
+      // 1. Create Supabase account
+      const { data, error } = await sb.auth.signUp({
+        email, password,
+        options: {
+          data: { full_name: firstName + ' ' + lastName },
+          emailRedirectTo: 'https://rival-radar.online/dashboard.html'
+        }
+      });
+
+      if (error) {
+        showMsg('signup-msg', error.message, 'error');
+        btn.disabled = false; btn.textContent = 'Create account →';
+        return;
+      }
+
+      // 2. Send to Formspree (fire and forget)
+      try {
+        await fetch(FORMSPREE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            rivals: rivalsRaw || 'None provided'
+          })
         });
-        if (error) {
-          showMsg(error.message, 'error');
-        } else if (data.session) {
-          // Email confirmation is off — user is immediately logged in
-          window.location.href = '/dashboard.html';
-        } else {
-          // Email confirmation is on — ask them to check inbox
-          showMsg('Account created! Check your email to confirm your address, then log in.', 'success');
+      } catch(_) {}
+
+      // 3. Save rivals to Supabase if user session exists
+      if (data.session && rivalsRaw) {
+        const userId = data.session.user.id;
+        const rivalList = rivalsRaw.split(/[\n,]+/).map(r => r.trim()).filter(Boolean);
+        for (const url of rivalList) {
+          let cleanUrl = url.startsWith('http') ? url : 'https://' + url;
+          await sb.from('rivals').insert({ user_id: userId, store_url: cleanUrl, store_name: cleanUrl.replace(/https?:\/\//, '').split('/')[0] });
         }
       }
 
-      btn.disabled = false;
-      btn.textContent = currentTab === 'login' ? 'Log in' : 'Create account';
+      // 4. Redirect or show success
+      if (data.session) {
+        window.location.href = '/dashboard.html';
+      } else {
+        showMsg('signup-msg', 'Account created! Check your email to confirm, then log in.', 'success');
+        btn.disabled = false; btn.textContent = 'Create account →';
+      }
     }
 
     async function handleReset(e) {
       e.preventDefault();
       const email = document.getElementById('reset-email').value.trim();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://rival-radar.online/dashboard.html'
-      });
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://rival-radar.online/dashboard.html' });
       const msg = document.getElementById('reset-msg');
       msg.className = 'message ' + (error ? 'error' : 'success');
       msg.textContent = error ? error.message : 'Reset link sent! Check your inbox.';
     }
 
-    function showReset(e) { e.preventDefault(); document.getElementById('auth-panel').style.display = 'none'; document.getElementById('reset-panel').style.display = 'block'; }
-    function showAuth(e) { e.preventDefault(); document.getElementById('reset-panel').style.display = 'none'; document.getElementById('auth-panel').style.display = 'block'; }
-    function showMsg(text, type) { const m = document.getElementById('msg'); m.textContent = text; m.className = 'message ' + type; }
-    function clearMsg() { const m = document.getElementById('msg'); m.className = 'message'; m.textContent = ''; }
+    function showReset(e) {
+      e.preventDefault();
+      document.getElementById('login-panel').style.display = 'none';
+      document.getElementById('reset-panel').style.display = 'block';
+      document.getElementById('home-link').style.display = 'none';
+    }
+    function showLogin(e) {
+      e.preventDefault();
+      document.getElementById('reset-panel').style.display = 'none';
+      document.getElementById('login-panel').style.display = 'block';
+      document.getElementById('home-link').style.display = 'block';
+    }
+    function showMsg(id, text, type) { const m = document.getElementById(id); m.textContent = text; m.className = 'message ' + type; }
+    function clearMsg(id) { const m = document.getElementById(id); m.className = 'message'; m.textContent = ''; }
   </script>
 
 </body>
