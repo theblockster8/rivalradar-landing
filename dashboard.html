@@ -159,6 +159,7 @@
 
     .page-hero { padding: var(--space-10) 0 var(--space-8); }
     .hero-grid { display: grid; grid-template-columns: 1.25fr 0.9fr; gap: var(--space-6); align-items: stretch; }
+    .hero-side { display: flex; flex-direction: column; gap: var(--space-6); }
     .hero-panel, .summary-card, .surface-card {
       background: var(--color-surface); border: 1px solid var(--color-border);
       border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);
@@ -476,27 +477,38 @@
             <div class="stat-pill"><span class="stat-dot"></span>Monitoring your real rivals</div>
           </div>
         </div>
-        <aside class="summary-card">
-          <div>
-            <h2 class="summary-title">Account overview</h2>
-            <p>Your subscription and monitoring status.</p>
-          </div>
-          <div class="status-stack">
-            <div class="status-row">
-              <div>
-                <div class="mini-note">Account status</div>
-                <div id="account-chip" class="account-chip inactive">Loading…</div>
-              </div>
-              <div class="mini-note" id="account-note"></div>
+        <div class="hero-side">
+          <aside class="summary-card">
+            <div>
+              <h2 class="summary-title">Account overview</h2>
+              <p>Your subscription and monitoring status.</p>
             </div>
-            <div class="status-row">
-              <div>
-                <div class="mini-note">Signed in as</div>
-                <div><strong id="account-email">—</strong></div>
+            <div class="status-stack">
+              <div class="status-row">
+                <div>
+                  <div class="mini-note">Account status</div>
+                  <div id="account-chip" class="account-chip inactive">Loading…</div>
+                </div>
+                <div class="mini-note" id="account-note"></div>
+              </div>
+              <div class="status-row">
+                <div>
+                  <div class="mini-note">Signed in as</div>
+                  <div><strong id="account-email">—</strong></div>
+                </div>
               </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+          <aside class="summary-card">
+            <div>
+              <h2 class="summary-title">Snapshot overview</h2>
+              <p>Products tracked per rival with last snapshot time.</p>
+            </div>
+            <div class="status-stack" id="store-summary">
+              <div class="loading-state">Loading…</div>
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
 
@@ -713,9 +725,23 @@
       if(!k)return'Unknown';
       let name=k.replace(/^[0-9a-f]{8}[\s_-]+/i,'');
       name=name.replace(/^[0-9a-f]{6,}[\s_-]+/i,'');
+      name=name.replace(/^demo[\s_-]+/i,'');
+      name=name.replace(/[\s_-]+(com|co|net|org|io|shop|store|us)$/i,'');
       name=name.replaceAll('_',' ').replaceAll('-',' ');
       name=name.replace(/\b\w/g,c=>c.toUpperCase()).trim();
       return name||k;
+    }
+
+    // This account's store_keys are prefixed with the first 8 chars of the user id
+    // (e.g. user 2f013f9d-... -> "2f013f9d__gymshark_com"). Scope all snapshot data to
+    // ONLY this user's rows so demo/sample stores (demo__*, bare keys) never leak in
+    // and the same brand under different prefixes is not duplicated.
+    function userPrefix(){ return currentUser ? currentUser.id.slice(0,8).toLowerCase() : ''; }
+    function isMine(store_key){
+      if(!store_key) return false;
+      const pfx=userPrefix();
+      if(!pfx) return false;
+      return store_key.toLowerCase().startsWith(pfx+'__') || store_key.toLowerCase().startsWith(pfx+'_') || store_key.toLowerCase().startsWith(pfx+'-') || store_key.toLowerCase().startsWith(pfx+' ');
     }
 
     sb.auth.getSession().then(({data:{session}})=>{
@@ -836,13 +862,16 @@
       errBanner.style.display='none';
       try{
         const snaps=await fetchAll('product_snapshots','*');
-        allSnaps=snaps;
+        // Scope to THIS user's stores only (excludes demo__* and bare/sample keys,
+        // and prevents the same brand under different prefixes from duplicating).
+        allSnaps=snaps.filter(r=>isMine(r.store_key));
 
-        const hist=await fetchAll(
+        const histRaw=await fetchAll(
           'product_snapshot_history',
           'store_key,product_handle,product_name,variant_name,price,snapshot_at',
           q=>q.order('snapshot_at',{ascending:true})
         );
+        const hist=histRaw.filter(r=>isMine(r.store_key));
         histMap={};
         for(const r of hist){
           const k=rkey(r.store_key,r.product_handle,r.variant_name);
@@ -869,6 +898,7 @@
         filteredPrices=[...allSnaps];pricePage=1;
         renderAvgCards();
         renderPricesTable();
+        renderStoreSummary();
         buildWow();
 
       } catch(err){
@@ -896,6 +926,28 @@
         const label=diff<-0.5?`↓ ${Math.abs(pct)}% below avg`:diff>0.5?`↑ ${pct}% above avg`:'≈ At market avg';
         return `<div class="avg-card"><div class="avg-store">${esc(cleanStore(s))}</div><div class="avg-price">${fmt$(avg)}</div><div class="avg-note">${count} products</div><div class="avg-vs ${cl}">${label}</div></div>`;
       }).join('');
+    }
+
+    function renderStoreSummary(){
+      const el=document.getElementById('store-summary');
+      if(!el)return;
+      if(!allSnaps.length){el.innerHTML='<div class="loading-state">No data yet.</div>';return;}
+      const grouped=allSnaps.reduce((acc,r)=>{
+        const k=r.store_key||'unknown';
+        if(!acc[k])acc[k]={count:0,latest:null};
+        acc[k].count++;
+        const d=r.created_at?new Date(r.created_at):null;
+        if(d&&(!acc[k].latest||d>acc[k].latest))acc[k].latest=d;
+        return acc;
+      },{});
+      el.innerHTML=Object.entries(grouped).sort(([a],[b])=>cleanStore(a).localeCompare(cleanStore(b))).map(([store,info])=>
+        `<div class="status-row">
+          <div><span class="tag tag-neutral">Live</span>
+            <div><strong>${esc(cleanStore(store))}</strong></div>
+            <div class="mini-note">${info.count.toLocaleString()} products</div>
+          </div>
+          <div class="mini-note">${info.latest?fmtDate(info.latest):''}</div>
+        </div>`).join('');
     }
 
     function renderPricesTable(){
