@@ -240,6 +240,19 @@
     .refresh-banner.done { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); display: flex; }
     .refresh-banner.error { background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error); display: flex; }
 
+    /* Macro trends chart (built from your real price history) */
+    .macro-chart-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); padding: var(--space-6); margin-bottom: var(--space-6); }
+    .macro-chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+    .macro-chart-title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); }
+    .macro-chart-note { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: 0.25rem; max-width: 46ch; }
+    .premium-badge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.02em; padding: 0.4rem 0.85rem; border-radius: 999px; background: linear-gradient(135deg,#7c3aed,#2563eb); color: #fff; box-shadow: 0 4px 14px color-mix(in srgb,#2563eb 35%, transparent); white-space: nowrap; }
+    .macro-chart-body { width: 100%; }
+    .macro-chart-body svg { width: 100%; height: auto; display: block; }
+    .macro-chart-empty { padding: var(--space-6); text-align: center; font-size: var(--text-sm); color: var(--color-text-muted); }
+    .macro-chart-legend { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-4); }
+    .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; }
+    .legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
     .dashboard-section { padding: var(--space-3) 0 var(--space-12); }
     .toolbar-strip { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
     .toolbar-card {
@@ -642,6 +655,17 @@
             <input class="search" id="wow-search" type="search" placeholder="Search product or variant" />
             <button class="ghost-btn" id="wow-clear">Clear</button>
           </div>
+          <div class="macro-chart-card">
+            <div class="macro-chart-head">
+              <div>
+                <div class="macro-chart-title">12-Week Macro Price Trends</div>
+                <div class="macro-chart-note">Weekly baseline averages from your recorded price history strip out daily noise to reveal each competitor's strategic movement.</div>
+              </div>
+              <span class="premium-badge">📊 Premium View: 12-Week Macro Trends</span>
+            </div>
+            <div class="macro-chart-body" id="macro-chart"></div>
+            <div class="macro-chart-legend" id="macro-legend"></div>
+          </div>
           <div class="wow-shell">
             <div class="changes-shell-header">
               <div class="changes-shell-header-left">
@@ -900,6 +924,7 @@
         renderPricesTable();
         renderStoreSummary();
         buildWow();
+        renderMacroChart();
 
       } catch(err){
         console.error('loadPrices error',err);
@@ -982,6 +1007,86 @@
       else if(sort==='store')rows.sort((a,b)=>cleanStore(a.store_key||'').localeCompare(cleanStore(b.store_key||'')));
       else rows.sort((a,b)=>(a.product_name||'').localeCompare(b.product_name||''));
       filteredPrices=rows;pricePage=1;renderPricesTable();
+    }
+
+    // ---------- 12-week macro trend chart (built from REAL price history) ----------
+    const MACRO_COLORS=['#2563eb','#22c55e','#f59e0b','#ec4899','#8b5cf6','#06b6d4','#ef4444','#14b8a6'];
+    // ISO-week key (year + week number) so snapshots group into calendar weeks
+    function isoWeekKey(d){
+      const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+      const day=dt.getUTCDay()||7; dt.setUTCDate(dt.getUTCDate()+4-day);
+      const yearStart=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+      const wk=Math.ceil((((dt-yearStart)/86400000)+1)/7);
+      return dt.getUTCFullYear()*100+wk;
+    }
+    function renderMacroChart(){
+      const el=document.getElementById('macro-chart');
+      const legendEl=document.getElementById('macro-legend');
+      if(!el)return;
+      // Aggregate real history into per-store weekly average prices.
+      // storeWeeks[store_key] = Map(weekKey -> {sum,count})
+      const storeWeeks={};
+      for(const k of Object.keys(histMap)){
+        const store=k.split('||')[0];
+        if(!store||!isMine(store))continue;
+        for(const pt of histMap[k]){
+          if(pt.price==null||Number.isNaN(pt.price))continue;
+          const d=new Date(pt.snapshot_at);
+          if(Number.isNaN(d.getTime()))continue;
+          const wk=isoWeekKey(d);
+          if(!storeWeeks[store])storeWeeks[store]=new Map();
+          const m=storeWeeks[store];
+          const cur=m.get(wk)||{sum:0,count:0};
+          cur.sum+=pt.price; cur.count++; m.set(wk,cur);
+        }
+      }
+      // Collect the union of week keys across all stores, keep the most recent 12.
+      const allWeeks=new Set();
+      Object.values(storeWeeks).forEach(m=>{for(const w of m.keys())allWeeks.add(w);});
+      const weekKeys=[...allWeeks].sort((a,b)=>a-b).slice(-12);
+      // Build one series per store that has >=2 weekly data points within the window.
+      const series=[];
+      Object.keys(storeWeeks).sort((a,b)=>cleanStore(a).localeCompare(cleanStore(b))).forEach(store=>{
+        const m=storeWeeks[store];
+        const pts=weekKeys.map(w=>{const c=m.get(w);return c?c.sum/c.count:null;});
+        if(pts.filter(v=>v!=null).length>=2){
+          series.push({store,name:cleanStore(store),color:MACRO_COLORS[series.length%MACRO_COLORS.length],pts});
+        }
+      });
+      if(!series.length||weekKeys.length<2){
+        el.innerHTML='<div class="macro-chart-empty">Not enough price history yet to plot weekly trends. Trends appear once at least two weeks of snapshots are recorded for a competitor.</div>';
+        if(legendEl)legendEl.innerHTML='';
+        return;
+      }
+      const n=weekKeys.length;
+      const W=920,H=300,padL=48,padR=20,padT=20,padB=34;
+      // y-domain from real values
+      const vals=series.flatMap(s=>s.pts).filter(v=>v!=null);
+      let min=Math.floor(Math.min(...vals)/5)*5-5, max=Math.ceil(Math.max(...vals)/5)*5+5;
+      if(min===max){min-=5;max+=5;}
+      const xw=W-padL-padR, yh=H-padT-padB;
+      const x=i=>padL+(n===1?xw/2:(i/(n-1))*xw);
+      const y=v=>padT+yh-((v-min)/(max-min))*yh;
+      // gridlines + $ y labels
+      let grid=''; const steps=5;
+      for(let g=0;g<=steps;g++){
+        const val=min+(max-min)*g/steps; const gy=y(val);
+        grid+=`<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W-padR}" y2="${gy.toFixed(1)}" stroke="var(--color-border)" stroke-width="1" opacity="0.6"/>`;
+        grid+=`<text x="${padL-8}" y="${(gy+4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--color-text-muted)">$${Math.round(val)}</text>`;
+      }
+      // x labels (weeks)
+      let xlab='';
+      for(let i=0;i<n;i++){ if(i%2===0||i===n-1) xlab+=`<text x="${x(i).toFixed(1)}" y="${H-12}" text-anchor="middle" font-size="11" fill="var(--color-text-muted)">W${i+1}</text>`; }
+      // lines (skip gaps) + end dots
+      let lines='';
+      series.forEach(s=>{
+        let d='',started=false,lastIdx=-1;
+        s.pts.forEach((v,i)=>{ if(v==null)return; d+=`${started?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)} `; started=true; lastIdx=i; });
+        lines+=`<path d="${d.trim()}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+        if(lastIdx>=0) lines+=`<circle cx="${x(lastIdx).toFixed(1)}" cy="${y(s.pts[lastIdx]).toFixed(1)}" r="3.5" fill="${s.color}"/>`;
+      });
+      el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="12-week macro price trends by competitor">${grid}${xlab}${lines}</svg>`;
+      if(legendEl) legendEl.innerHTML=series.map(s=>`<span class="legend-item"><span class="legend-swatch" style="background:${s.color}"></span>${esc(s.name)}</span>`).join('');
     }
 
     function buildWow(){
