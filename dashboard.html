@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-  <!-- v7: no product limit, paginated fetch, RLS-safe -->
+  <!-- v8: anonymized store names, pulsing live indicator -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard – RivalRadar</title>
@@ -20,6 +20,7 @@
       --color-warn:#d97706;--color-warn-bg:#fffbeb;
       --color-error:#dc2626;--color-error-bg:#fef2f2;
       --color-success:#16a34a;--color-success-bg:#f0fdf4;
+      --color-live:#22c55e;--color-live-bg:#f0fdf4;
       --font-display:'Cabinet Grotesk','Helvetica Neue',sans-serif;
       --font-body:'Satoshi','Inter',sans-serif;
       --radius-sm:0.375rem;--radius-md:0.625rem;--radius-lg:1rem;
@@ -38,6 +39,7 @@
       --color-up:#f87171;--color-up-bg:#2d0a0a;
       --color-new:#a78bfa;--color-new-bg:#1e1030;
       --color-warn:#fbbf24;--color-warn-bg:#1a1200;
+      --color-live:#4ade80;--color-live-bg:#052e16;
       --shadow-sm:0 1px 3px rgba(0,0,0,0.3);
       --shadow-glow:0 18px 40px rgba(59,130,246,0.06);
     }
@@ -77,6 +79,14 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .spinner{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:spin 0.6s linear infinite;flex-shrink:0;}
 
+    /* ── Live indicator ── */
+    @keyframes livePulse{
+      0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.55);}
+      50%{box-shadow:0 0 0 6px rgba(34,197,94,0);}
+    }
+    .live-badge{display:inline-flex;align-items:center;gap:0.45rem;padding:0.25rem 0.65rem;border-radius:var(--radius-full);background:var(--color-live-bg);border:1px solid color-mix(in srgb,var(--color-live) 35%,transparent);font-size:0.72rem;font-family:var(--font-display);font-weight:700;color:var(--color-live);white-space:nowrap;letter-spacing:0.02em;}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:var(--color-live);flex-shrink:0;animation:livePulse 1.8s ease-in-out infinite;}
+
     .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;}
     .stat-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:1.1rem 1.25rem;}
     .stat-value{font-family:var(--font-display);font-size:1.8rem;font-weight:800;letter-spacing:-0.04em;color:var(--color-text);}
@@ -109,7 +119,8 @@
     .ghost-btn:hover{background:var(--color-surface);color:var(--color-text);}
 
     .table-shell{border-radius:var(--radius-xl);border:1px solid var(--color-border);background:var(--color-surface);box-shadow:var(--shadow-sm),var(--shadow-glow);overflow:hidden;margin-bottom:1.5rem;}
-    .table-shell-header{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.85rem 1.25rem;border-bottom:1px solid var(--color-divider);background:color-mix(in srgb,var(--color-surface) 84%,var(--color-bg));}
+    .table-shell-header{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.85rem 1.25rem;border-bottom:1px solid var(--color-divider);background:color-mix(in srgb,var(--color-surface) 84%,var(--color-bg));flex-wrap:wrap;}
+    .table-shell-left{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
     .table-shell-title{font-family:var(--font-display);font-size:0.95rem;font-weight:700;letter-spacing:-0.02em;}
     .table-shell-note{font-size:0.75rem;color:var(--color-text-faint);}
     .table-scroll{max-height:540px;overflow:auto;}
@@ -224,6 +235,12 @@
         <div><div class="section-label">Activity</div><div class="section-title">Recent alerts</div></div>
       </div>
       <div class="table-shell">
+        <div class="table-shell-header">
+          <div class="table-shell-left">
+            <div class="table-shell-title">Price alerts</div>
+            <span class="live-badge"><span class="live-dot"></span>Connected to Live Web Scrapers (Updating Daily)</span>
+          </div>
+        </div>
         <div id="alerts-container"><div class="loading">Loading…</div></div>
       </div>
     </div>
@@ -236,18 +253,24 @@
         <div><div class="section-label">Product catalog</div><div class="section-title">All tracked products</div></div>
       </div>
       <div class="toolbar">
-        <select id="price-store-filter"><option value="all">All stores</option></select>
+        <select id="price-store-filter"><option value="all">All competitors</option></select>
         <input type="search" id="price-search" placeholder="Search product…" />
         <select id="price-sort">
           <option value="name">Sort: Name A–Z</option>
           <option value="price_asc">Sort: Price low–high</option>
           <option value="price_desc">Sort: Price high–low</option>
-          <option value="store">Sort: Store</option>
+          <option value="store">Sort: Competitor</option>
         </select>
       </div>
       <div class="table-shell">
         <div class="table-shell-header">
-          <div><div class="table-shell-title">All products</div><div class="table-shell-note" id="prices-note">Latest snapshot per product.</div></div>
+          <div class="table-shell-left">
+            <div>
+              <div class="table-shell-title">All products</div>
+              <div class="table-shell-note" id="prices-note">Latest snapshot per product.</div>
+            </div>
+            <span class="live-badge"><span class="live-dot"></span>Connected to Live Web Scrapers (Updating Daily)</span>
+          </div>
           <div class="pager">
             <button class="pager-btn" id="price-prev">Prev</button>
             <span class="pager-label" id="price-page-label">Page 1 of 1</span>
@@ -256,7 +279,7 @@
         </div>
         <div class="table-scroll">
           <table>
-            <thead><tr><th>Store</th><th>Product</th><th>Variant</th><th>Price</th><th>Compare at</th><th>Last seen</th></tr></thead>
+            <thead><tr><th>Competitor</th><th>Product</th><th>Variant</th><th>Price</th><th>Compare at</th><th>Last seen</th></tr></thead>
             <tbody id="prices-body"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
           </table>
         </div>
@@ -269,7 +292,7 @@
         <div><div class="section-label">Price movement</div><div class="section-title">Week-over-week changes</div></div>
       </div>
       <div class="toolbar">
-        <select id="wow-store-filter"><option value="all">All stores</option></select>
+        <select id="wow-store-filter"><option value="all">All competitors</option></select>
         <select id="wow-dir-filter">
           <option value="all">All movements</option>
           <option value="drop">Drops only</option>
@@ -281,7 +304,13 @@
       </div>
       <div class="table-shell">
         <div class="table-shell-header">
-          <div><div class="table-shell-title">Price movement</div><div class="table-shell-note">Current vs. first recorded price. Trend = all history.</div></div>
+          <div class="table-shell-left">
+            <div>
+              <div class="table-shell-title">Price movement</div>
+              <div class="table-shell-note">Current vs. first recorded price. Trend = all history.</div>
+            </div>
+            <span class="live-badge"><span class="live-dot"></span>Connected to Live Web Scrapers (Updating Daily)</span>
+          </div>
           <div class="pager">
             <button class="pager-btn" id="wow-prev">Prev</button>
             <span class="pager-label" id="wow-page-label">Page 1 of 1</span>
@@ -290,7 +319,7 @@
         </div>
         <div class="table-scroll">
           <table>
-            <thead><tr><th>Store</th><th>Product</th><th>Variant</th><th>Current</th><th>First recorded</th><th>Change</th><th>%</th><th>Trend</th></tr></thead>
+            <thead><tr><th>Competitor</th><th>Product</th><th>Variant</th><th>Current</th><th>First recorded</th><th>Change</th><th>%</th><th>Trend</th></tr></thead>
             <tbody id="wow-body"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
           </table>
         </div>
@@ -325,7 +354,7 @@
     const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
     const PAGE=100;
-    const BATCH=1000; // rows per supabase page fetch
+    const BATCH=1000;
     let currentUser=null;
     let refreshCooldown=false;
     let allSnaps=[];
@@ -334,6 +363,29 @@
     let wowPage=1,wowTotal=1;
     let filteredPrices=[],pricePage=1,priceTotal=1;
     let dataLoaded=false;
+
+    // ── Store anonymisation ──────────────────────────────────────────────────
+    // Maps raw store_key → stable "Competitor A (Live Feed)" label.
+    // The mapping is built once when data loads so order is deterministic.
+    const LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let storeAliasMap={};   // raw key → alias label
+    let storeAliasKeys={};  // alias label → raw key  (for filter reversal)
+
+    function buildAliasMap(storeKeys){
+      storeAliasMap={};storeAliasKeys={};
+      const sorted=[...storeKeys].sort(); // sort for stable ordering across reloads
+      sorted.forEach((k,i)=>{
+        const letter=LETTERS[i]||(i+1).toString();
+        const alias=`Competitor ${letter} (Live Feed)`;
+        storeAliasMap[k]=alias;
+        storeAliasKeys[alias]=k;
+      });
+    }
+
+    function anonStore(rawKey){
+      return storeAliasMap[rawKey]||'Competitor ? (Live Feed)';
+    }
+    // ────────────────────────────────────────────────────────────────────────
 
     sb.auth.getSession().then(({data:{session}})=>{
       if(!session){window.location.href='/login.html';return;}
@@ -414,20 +466,18 @@
       }
       const tagMap={price_down:'tag-down',price_up:'tag-up',new_product:'tag-new',stock_change:'tag-neutral'};
       const labelMap={price_down:'↓ Price drop',price_up:'↑ Price rise',new_product:'New product',stock_change:'Stock change'};
-      container.innerHTML=`<table><thead><tr><th>Product</th><th>Store</th><th>Change</th><th>Price</th><th>Detected</th></tr></thead><tbody>${
+      container.innerHTML=`<table><thead><tr><th>Product</th><th>Competitor</th><th>Change</th><th>Price</th><th>Detected</th></tr></thead><tbody>${
         data.map(a=>`<tr>
           <td><strong>${esc(a.product_title||'—')}</strong></td>
-          <td><span class="store-chip">${esc(cleanStore(a.store_name||a.store_key||'—'))}</span></td>
+          <td><span class="store-chip">${esc(anonStore(a.store_key||a.store_name||''))}</span></td>
           <td><span class="tag ${tagMap[a.change_type]||'tag-neutral'}">${labelMap[a.change_type]||a.change_type}</span></td>
           <td>${a.old_price!=null?fmt$(a.old_price)+' → ':''}${a.new_price!=null?fmt$(a.new_price):'—'}</td>
           <td style="font-size:0.8rem;color:var(--color-text-faint)">${fmtDate(a.detected_at)}</td></tr>`).join('')
       }</tbody></table>`;
     }
 
-    // Fetch ALL rows from a table using range pagination — no artificial limit
-    async function fetchAll(table, selectCols, extraQuery){
-      let all=[];
-      let from=0;
+    async function fetchAll(table,selectCols,extraQuery){
+      let all=[];let from=0;
       while(true){
         let q=sb.from(table).select(selectCols).range(from,from+BATCH-1);
         if(extraQuery) q=extraQuery(q);
@@ -435,7 +485,7 @@
         if(error) throw error;
         if(!data||data.length===0) break;
         all=all.concat(data);
-        if(data.length<BATCH) break; // last page
+        if(data.length<BATCH) break;
         from+=BATCH;
       }
       return all;
@@ -446,11 +496,9 @@
       const errBanner=document.getElementById('data-error');
       errBanner.style.display='none';
       try{
-        // Load all snapshots — no limit
         const snaps=await fetchAll('product_snapshots','*');
         allSnaps=snaps;
 
-        // Load all history — sorted by snapshot_at asc
         const hist=await fetchAll(
           'product_snapshot_history',
           'store_key,product_handle,product_name,variant_name,price,snapshot_at',
@@ -463,6 +511,10 @@
           histMap[k].push({price:Number(r.price),snapshot_at:r.snapshot_at});
         }
 
+        // Build alias map from all distinct store keys
+        const storeKeys=[...new Set(allSnaps.map(r=>r.store_key).filter(Boolean))].sort();
+        buildAliasMap(storeKeys);
+
         dataLoaded=true;
 
         document.getElementById('stat-products').textContent=allSnaps.length.toLocaleString();
@@ -473,11 +525,12 @@
           for(let i=1;i<pts.length;i++) if(pts[i].price!==pts[i-1].price) changes++;
         document.getElementById('stat-changes').textContent=changes.toLocaleString();
 
-        const stores=[...new Set(allSnaps.map(r=>r.store_key).filter(Boolean))].sort();
-        const opts='<option value="all">All stores</option>'+stores.map(s=>`<option value="${s}">${esc(cleanStore(s))}</option>`).join('');
+        // Populate store filter dropdowns with anonymized labels
+        const opts='<option value="all">All competitors</option>'+
+          storeKeys.map(s=>`<option value="${s}">${esc(anonStore(s))}</option>`).join('');
         ['price-store-filter','wow-store-filter'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
 
-        filteredPrices=[...allSnaps]; pricePage=1;
+        filteredPrices=[...allSnaps];pricePage=1;
         renderAvgCards();
         renderPricesTable();
         buildWow();
@@ -505,7 +558,7 @@
         const diff=avg-global;const pct=global?((diff/global)*100).toFixed(1):0;
         const cl=diff<-0.5?'cheaper':diff>0.5?'pricier':'';
         const label=diff<-0.5?`↓ ${Math.abs(pct)}% below avg`:diff>0.5?`↑ ${pct}% above avg`:'≈ At market avg';
-        return `<div class="avg-card"><div class="avg-store">${esc(cleanStore(s))}</div><div class="avg-price">${fmt$(avg)}</div><div class="avg-note">${count} products</div><div class="avg-vs ${cl}">${label}</div></div>`;
+        return `<div class="avg-card"><div class="avg-store">${esc(anonStore(s))}</div><div class="avg-price">${fmt$(avg)}</div><div class="avg-note">${count} products</div><div class="avg-vs ${cl}">${label}</div></div>`;
       }).join('');
     }
 
@@ -515,7 +568,7 @@
       const body=document.getElementById('prices-body');
       if(!rows.length){body.innerHTML='<tr><td colspan="6" class="empty-state">No products found.</td></tr>';}
       else body.innerHTML=rows.map(r=>`<tr>
-        <td><span class="store-chip">${esc(cleanStore(r.store_key||'—'))}</span></td>
+        <td><span class="store-chip">${esc(anonStore(r.store_key||''))}</span></td>
         <td><strong>${esc(r.product_name||r.product_handle||'Untitled')}</strong></td>
         <td style="color:var(--color-text-faint);font-size:0.8rem">${esc(r.variant_name||'—')}</td>
         <td><strong>${fmt$(r.price)}</strong></td>
@@ -535,11 +588,11 @@
         const s=(r.store_key||'').toLowerCase();
         const name=(r.product_name||r.product_handle||'').toLowerCase();
         const vari=(r.variant_name||'').toLowerCase();
-        return(store==='all'||s===store)&&(!q||name.includes(q)||vari.includes(q));
+        return(store==='all'||r.store_key===store)&&(!q||name.includes(q)||vari.includes(q));
       });
       if(sort==='price_asc')rows.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
       else if(sort==='price_desc')rows.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
-      else if(sort==='store')rows.sort((a,b)=>(a.store_key||'').localeCompare(b.store_key||''));
+      else if(sort==='store')rows.sort((a,b)=>anonStore(a.store_key||'').localeCompare(anonStore(b.store_key||'')));
       else rows.sort((a,b)=>(a.product_name||'').localeCompare(b.product_name||''));
       filteredPrices=rows;pricePage=1;renderPricesTable();
     }
@@ -560,12 +613,12 @@
       const dir=document.getElementById('wow-dir-filter').value;
       const q=document.getElementById('wow-search').value.trim().toLowerCase();
       filteredWow=wowRows.filter(w=>{
-        const s=(w.snap.store_key||'').toLowerCase();
         const name=(w.snap.product_name||w.snap.product_handle||'').toLowerCase();
         const vari=(w.snap.variant_name||'').toLowerCase();
+        const alias=anonStore(w.snap.store_key||'').toLowerCase();
         let d='flat';
         if(w.first!==null){if(w.cur<w.first)d='drop';else if(w.cur>w.first)d='increase';}
-        return(store==='all'||s===store)&&(dir==='all'||d===dir)&&(!q||name.includes(q)||vari.includes(q)||s.includes(q));
+        return(store==='all'||w.snap.store_key===store)&&(dir==='all'||d===dir)&&(!q||name.includes(q)||vari.includes(q)||alias.includes(q));
       });
       wowPage=1;renderWowTable();
     }
@@ -607,7 +660,7 @@
           :delta===0?'<span class="wow-pill flat">No change</span>'
           :`<span class="wow-pill ${d==='drop'?'down':'up'}">${d==='drop'?'▼':'▲'} ${fmt$(Math.abs(delta))}</span>`;
         return `<tr>
-          <td><span class="store-chip">${esc(cleanStore(w.snap.store_key||'—'))}</span></td>
+          <td><span class="store-chip">${esc(anonStore(w.snap.store_key||''))}</span></td>
           <td><strong>${esc(w.snap.product_name||w.snap.product_handle||'Untitled')}</strong></td>
           <td style="color:var(--color-text-faint);font-size:0.8rem">${esc(w.snap.variant_name||'—')}</td>
           <td><strong>${fmt$(w.cur)}</strong></td>
@@ -684,11 +737,6 @@
     })();
 
     function rkey(s,p,v){return`${s||''}||${p||''}||${v||''}`;}
-    function cleanStore(k){
-      if(!k)return'Unknown';
-      let n=k.replace(/^[0-9a-f]{8}[\s_-]+/i,'').replace(/^[0-9a-f]{6,}[\s_-]+/i,'');
-      return n.replaceAll('_',' ').replaceAll('-',' ').replace(/\b\w/g,c=>c.toUpperCase()).trim()||k;
-    }
     function fmt$(v){const n=Number(v);if(v===null||v===undefined||v===''||Number.isNaN(n))return'—';return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);}
     function fmtDate(v){if(!v)return'—';const d=new Date(v);if(Number.isNaN(d.getTime()))return v;return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(d);}
     function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
