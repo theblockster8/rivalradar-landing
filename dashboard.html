@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+  <!-- v6: sparklines, week-over-week, correct column names -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard – RivalRadar</title>
@@ -19,11 +20,13 @@
       --color-warn: #d97706; --color-warn-bg: #fffbeb;
       --color-error: #dc2626; --color-error-bg: #fef2f2;
       --color-success: #16a34a; --color-success-bg: #f0fdf4;
+      --color-panel-glow: rgba(37,99,235,0.08);
       --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
       --font-body: 'Satoshi', 'Inter', sans-serif;
       --radius-sm: 0.375rem; --radius-md: 0.625rem; --radius-lg: 1rem;
       --radius-xl: 1.5rem; --radius-full: 9999px;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-glow: 0 18px 40px rgba(37,99,235,0.08);
       --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     [data-theme="dark"] {
@@ -36,13 +39,15 @@
       --color-up: #f87171; --color-up-bg: #2d0a0a;
       --color-new: #a78bfa; --color-new-bg: #1e1030;
       --color-warn: #fbbf24; --color-warn-bg: #1a1200;
+      --color-panel-glow: rgba(59,130,246,0.1);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
     }
     *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body { margin: 0; font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); -webkit-font-smoothing: antialiased; min-height: 100dvh; }
     h1,h2,h3,h4 { font-family: var(--font-display); margin: 0; line-height: 1.1; }
     p { margin: 0; } a { color: var(--color-accent); text-decoration: none; }
-    button { cursor: pointer; font: inherit; } input, select { font: inherit; }
+    button { cursor: pointer; font: inherit; } input, select { font: inherit; color: inherit; }
 
     .nav { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--color-bg) 92%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-divider); }
     .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
@@ -57,11 +62,10 @@
 
     .main { max-width: 1200px; margin: 0 auto; padding: 2rem clamp(1rem, 4vw, 2.5rem); }
 
-    /* TABS */
-    .tabs { display: flex; gap: 0.25rem; border-bottom: 2px solid var(--color-border); margin-bottom: 2rem; }
-    .tab-btn { padding: 0.6rem 1.1rem; font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; border: none; background: transparent; color: var(--color-text-muted); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all var(--transition); border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
-    .tab-btn:hover { color: var(--color-text); background: var(--color-surface); }
-    .tab-btn.active { color: var(--color-accent); border-bottom-color: var(--color-accent); background: transparent; }
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--color-divider); margin-bottom: 2rem; }
+    .tab-btn { padding: 0.6rem 1.1rem; font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; border: none; background: transparent; color: var(--color-text-faint); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all var(--transition); }
+    .tab-btn:hover { color: var(--color-text-muted); }
+    .tab-btn.active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
     .tab-panel { display: none; } .tab-panel.active { display: block; }
 
     .status-banner { padding: 0.75rem 1.25rem; border-radius: var(--radius-lg); font-size: 0.875rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
@@ -71,71 +75,97 @@
     .refresh-banner.running { background: var(--color-accent-light); color: var(--color-accent); border: 1px solid var(--color-accent); display: flex; }
     .refresh-banner.done { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); display: flex; }
     .refresh-banner.error { background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error); display: flex; }
-
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin 0.6s linear infinite; flex-shrink: 0; }
-
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
-    .section-title { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
-    .section-label { font-size: 0.7rem; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint); margin-bottom: 0.4rem; }
 
     .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .stat-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; }
     .stat-value { font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; letter-spacing: -0.04em; color: var(--color-text); }
     .stat-label { font-size: 0.8rem; color: var(--color-text-faint); margin-top: 0.2rem; }
 
+    .section-label { font-size: 0.7rem; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint); margin-bottom: 0.4rem; }
+    .section-title { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+
     .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
 
+    /* Rivals */
     .rivals-grid { display: grid; gap: 0.75rem; margin-bottom: 1.5rem; }
     .rival-row { display: flex; align-items: center; justify-content: space-between; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0.9rem 1.25rem; gap: 1rem; }
     .rival-name { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; }
     .rival-url { font-size: 0.78rem; color: var(--color-text-faint); margin-top: 0.15rem; }
     .rival-delete { width: 30px; height: 30px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: transparent; color: var(--color-text-faint); font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all var(--transition); flex-shrink: 0; }
     .rival-delete:hover { background: var(--color-up-bg); color: var(--color-up); border-color: var(--color-up); }
-
     .add-rival-form { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .add-rival-form input { flex: 1 1 200px; height: 42px; padding: 0 0.9rem; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text); font-size: 0.875rem; outline: none; transition: border-color var(--transition), box-shadow var(--transition); }
+    .add-rival-form input { flex: 1 1 200px; height: 42px; padding: 0 0.9rem; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-bg); font-size: 0.875rem; outline: none; transition: border-color var(--transition), box-shadow var(--transition); }
     .add-rival-form input:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
     .primary-btn { height: 42px; padding: 0 1.25rem; border-radius: var(--radius-md); border: 2px solid var(--color-primary); background: var(--color-primary); color: var(--color-text-inverse); font-family: var(--font-display); font-weight: 700; font-size: 0.875rem; transition: all var(--transition); white-space: nowrap; }
     .primary-btn:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
     .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* PRICES TABLE */
-    .prices-toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
-    .prices-toolbar select, .prices-toolbar input { height: 38px; padding: 0 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text); font-size: 0.875rem; outline: none; }
-    .prices-toolbar select:focus, .prices-toolbar input:focus { border-color: var(--color-accent); }
-    .prices-toolbar input { flex: 1 1 180px; }
+    /* Tables */
+    .toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+    .toolbar select, .toolbar input { height: 38px; padding: 0 0.8rem; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-bg); font-size: 0.875rem; outline: none; }
+    .toolbar select:focus, .toolbar input:focus { border-color: var(--color-accent); }
+    .toolbar input { flex: 1 1 180px; }
+    .ghost-btn { height: 38px; padding: 0 0.9rem; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-bg); color: var(--color-text-muted); font-size: 0.875rem; transition: all var(--transition); }
+    .ghost-btn:hover { background: var(--color-surface); color: var(--color-text); }
 
-    .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    .data-table th { text-align: left; font-family: var(--font-display); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-faint); padding: 0 0.75rem 0.75rem; border-bottom: 1px solid var(--color-border); white-space: nowrap; }
-    .data-table td { padding: 0.85rem 0.75rem; border-bottom: 1px solid var(--color-divider); color: var(--color-text-muted); vertical-align: middle; }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table td strong { color: var(--color-text); font-weight: 600; }
-    .data-table tbody tr:hover { background: color-mix(in srgb, var(--color-accent-light) 30%, transparent); }
+    .table-shell { border-radius: var(--radius-xl); border: 1px solid var(--color-border); background: var(--color-surface); box-shadow: var(--shadow-sm), var(--shadow-glow); overflow: hidden; margin-bottom: 1.5rem; }
+    .table-shell-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--color-divider); background: color-mix(in srgb, var(--color-surface) 84%, var(--color-bg)); }
+    .table-shell-title { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; letter-spacing: -0.02em; }
+    .table-shell-note { font-size: 0.75rem; color: var(--color-text-faint); }
+    .table-scroll { max-height: 540px; overflow: auto; }
+    .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .table-scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-text-faint) 50%, transparent); border-radius: 999px; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    th { text-align: left; font-family: var(--font-display); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-faint); padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-surface) 84%, var(--color-bg)); position: sticky; top: 0; z-index: 1; white-space: nowrap; }
+    td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-divider); font-size: 0.875rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: color-mix(in srgb, var(--color-accent-light) 30%, transparent); }
+    td strong { color: var(--color-text); font-weight: 600; }
 
-    /* COMPARISON CARDS */
-    .avg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .avg-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
-    .avg-store { font-family: var(--font-display); font-weight: 800; font-size: 0.9rem; margin-bottom: 0.25rem; }
-    .avg-price { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.04em; }
-    .avg-note { font-size: 0.75rem; color: var(--color-text-faint); margin-top: 0.2rem; }
-    .avg-vs { font-size: 0.75rem; margin-top: 0.4rem; font-weight: 700; }
-    .avg-vs.cheaper { color: var(--color-down); } .avg-vs.pricier { color: var(--color-up); }
+    .store-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.65rem; border-radius: var(--radius-full); background: var(--color-bg); border: 1px solid var(--color-border); font-size: 0.8rem; white-space: nowrap; }
+    .store-chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); flex-shrink: 0; }
 
     .tag { display: inline-flex; align-items: center; padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.7rem; font-family: var(--font-display); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
     .tag-down { background: var(--color-down-bg); color: var(--color-down); }
     .tag-up { background: var(--color-up-bg); color: var(--color-up); }
     .tag-new { background: var(--color-new-bg); color: var(--color-new); }
-    .tag-inactive { background: var(--color-surface-2); color: var(--color-text-faint); }
+    .tag-neutral { background: var(--color-surface-2); color: var(--color-text-muted); }
+
+    /* Sparklines */
+    .sparkline-wrap { display: flex; align-items: center; gap: 5px; }
+    .sparkline-svg { display: block; overflow: visible; }
+    .sparkline-label { font-size: 10px; color: var(--color-text-faint); white-space: nowrap; }
+    .sparkline-none { font-size: 0.75rem; color: var(--color-text-faint); font-style: italic; }
+
+    /* WoW pill */
+    .wow-pill { display: inline-flex; align-items: center; gap: 3px; padding: 0.2rem 0.5rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; font-family: var(--font-display); }
+    .wow-pill.down { background: var(--color-down-bg); color: var(--color-down); }
+    .wow-pill.up { background: var(--color-up-bg); color: var(--color-up); }
+    .wow-pill.flat { background: var(--color-surface-2); color: var(--color-text-faint); }
+
+    /* Avg cards */
+    .avg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .avg-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+    .avg-store { font-family: var(--font-display); font-weight: 800; font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .avg-price { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.04em; }
+    .avg-note { font-size: 0.75rem; color: var(--color-text-faint); margin-top: 0.15rem; }
+    .avg-vs { font-size: 0.75rem; font-weight: 700; margin-top: 0.35rem; }
+    .avg-vs.cheaper { color: var(--color-down); } .avg-vs.pricier { color: var(--color-up); }
+
+    .pager { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .pager-btn { height: 30px; padding: 0 0.6rem; border-radius: var(--radius-full); border: 1px solid var(--color-border); background: transparent; color: var(--color-text-muted); font-size: 0.75rem; transition: all var(--transition); }
+    .pager-btn:hover:not(:disabled) { background: var(--color-surface); color: var(--color-text); }
+    .pager-btn:disabled { opacity: 0.35; cursor: default; }
+    .pager-label { font-size: 0.75rem; color: var(--color-text-faint); }
 
     .empty-state { text-align: center; padding: 3rem 1rem; color: var(--color-text-faint); }
-    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-    .empty-state p { font-size: 0.9rem; max-width: 30ch; margin: 0 auto; }
-    .loading { color: var(--color-text-faint); font-size: 0.875rem; padding: 1.5rem 0; }
+    .loading { color: var(--color-text-faint); font-size: 0.875rem; padding: 1.5rem; }
     .msg { padding: 0.6rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 0.75rem; display: none; }
     .msg.error { background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error); display: block; }
     .msg.success { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); display: block; }
-    .table-scroll { overflow-x: auto; }
 
     @media (max-width: 640px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
@@ -161,7 +191,7 @@
         <span class="user-email" id="user-email"></span>
         <button class="btn-sm" id="refresh-btn" onclick="triggerRefresh()">🔄 Refresh data</button>
         <button class="btn-sm" onclick="signOut()">Sign out</button>
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+        <button class="theme-toggle" id="theme-btn" aria-label="Toggle dark mode">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
         </button>
       </div>
@@ -169,29 +199,27 @@
   </nav>
 
   <main class="main">
-
     <div id="status-banner" class="status-banner inactive" style="display:none">
       <span id="status-icon">⚠️</span>
       <span id="status-text">Your subscription is inactive. <a href="/#pricing">Upgrade to activate monitoring →</a></span>
     </div>
-
     <div id="refresh-banner" class="refresh-banner">
       <div class="spinner" id="refresh-spinner"></div>
       <span id="refresh-text"></span>
     </div>
 
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-value" id="stat-rivals">-</div><div class="stat-label">Rivals monitored</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-alerts">-</div><div class="stat-label">Alerts this month</div></div>
-      <div class="stat-card"><div class="stat-value" id="stat-products">-</div><div class="stat-label">Products tracked</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-rivals">—</div><div class="stat-label">Rivals monitored</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-products">—</div><div class="stat-label">Products tracked</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-changes">—</div><div class="stat-label">Price changes</div></div>
       <div class="stat-card"><div class="stat-value" id="stat-status">—</div><div class="stat-label">Account status</div></div>
     </div>
 
-    <!-- TABS -->
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('alerts')">🔔 Alerts</button>
-      <button class="tab-btn" onclick="switchTab('prices')">💰 Live Prices</button>
-      <button class="tab-btn" onclick="switchTab('rivals')">🏪 Rivals</button>
+      <button class="tab-btn active" data-tab="alerts">🔔 Alerts</button>
+      <button class="tab-btn" data-tab="prices">💰 Live Prices</button>
+      <button class="tab-btn" data-tab="wow">📈 Week over Week</button>
+      <button class="tab-btn" data-tab="rivals">🏪 Rivals</button>
     </div>
 
     <!-- ALERTS TAB -->
@@ -199,26 +227,21 @@
       <div class="section-header">
         <div><div class="section-label">Activity</div><div class="section-title">Recent alerts</div></div>
       </div>
-      <div class="card" style="padding: 0; overflow: hidden;">
-        <div id="alerts-container"><div class="loading" style="padding:1.5rem">Loading...</div></div>
+      <div class="table-shell">
+        <div id="alerts-container"><div class="loading">Loading…</div></div>
       </div>
     </div>
 
     <!-- LIVE PRICES TAB -->
     <div id="tab-prices" class="tab-panel">
-      <div class="section-header">
-        <div><div class="section-label">Price Intelligence</div><div class="section-title">Live price comparison</div></div>
-      </div>
-
       <div class="section-label" style="margin-bottom:0.5rem">Average price by store</div>
-      <div id="avg-grid" class="avg-grid"><div class="loading">Loading averages…</div></div>
-
+      <div id="avg-grid" class="avg-grid"><div class="loading">Loading…</div></div>
       <div class="section-header" style="margin-top:1.5rem">
         <div><div class="section-label">Product catalog</div><div class="section-title">All tracked products</div></div>
       </div>
-      <div class="prices-toolbar">
+      <div class="toolbar">
         <select id="price-store-filter"><option value="all">All stores</option></select>
-        <input type="search" id="price-search" placeholder="Search product name…" />
+        <input type="search" id="price-search" placeholder="Search product…" />
         <select id="price-sort">
           <option value="name">Sort: Name A–Z</option>
           <option value="price_asc">Sort: Price low–high</option>
@@ -226,13 +249,53 @@
           <option value="store">Sort: Store</option>
         </select>
       </div>
-      <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-shell">
+        <div class="table-shell-header">
+          <div><div class="table-shell-title">All products</div><div class="table-shell-note">Latest snapshot per product.</div></div>
+          <div class="pager">
+            <button class="pager-btn" id="price-prev">Prev</button>
+            <span class="pager-label" id="price-page-label">Page 1 of 1</span>
+            <button class="pager-btn" id="price-next">Next</button>
+          </div>
+        </div>
         <div class="table-scroll">
-          <table class="data-table">
-            <thead><tr>
-              <th>Store</th><th>Product</th><th>Variant</th><th>Price</th><th>vs. avg</th><th>In stock</th><th>Last seen</th>
-            </tr></thead>
-            <tbody id="prices-body"><tr><td colspan="7" class="loading" style="padding:1.5rem">Loading prices…</td></tr></tbody>
+          <table>
+            <thead><tr><th>Store</th><th>Product</th><th>Variant</th><th>Price</th><th>Compare at</th><th>Last seen</th></tr></thead>
+            <tbody id="prices-body"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEK OVER WEEK TAB -->
+    <div id="tab-wow" class="tab-panel">
+      <div class="section-header">
+        <div><div class="section-label">Price movement</div><div class="section-title">Week-over-week changes</div></div>
+      </div>
+      <div class="toolbar">
+        <select id="wow-store-filter"><option value="all">All stores</option></select>
+        <select id="wow-dir-filter">
+          <option value="all">All movements</option>
+          <option value="drop">Drops only</option>
+          <option value="increase">Increases only</option>
+          <option value="flat">Flat</option>
+        </select>
+        <input type="search" id="wow-search" placeholder="Search product…" />
+        <button class="ghost-btn" id="wow-clear">Clear</button>
+      </div>
+      <div class="table-shell">
+        <div class="table-shell-header">
+          <div><div class="table-shell-title">Price movement</div><div class="table-shell-note">Current vs. first recorded price. Trend shows all history.</div></div>
+          <div class="pager">
+            <button class="pager-btn" id="wow-prev">Prev</button>
+            <span class="pager-label" id="wow-page-label">Page 1 of 1</span>
+            <button class="pager-btn" id="wow-next">Next</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Store</th><th>Product</th><th>Variant</th><th>Current</th><th>First recorded</th><th>Change</th><th>%</th><th>Trend</th></tr></thead>
+            <tbody id="wow-body"><tr><td colspan="8" class="loading">Loading…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -243,7 +306,7 @@
       <div class="section-header">
         <div><div class="section-label">Monitoring</div><div class="section-title">Your rivals</div></div>
       </div>
-      <div id="rivals-list" class="rivals-grid"><div class="loading">Loading...</div></div>
+      <div id="rivals-list" class="rivals-grid"><div class="loading">Loading…</div></div>
       <div class="card">
         <div class="section-label" style="margin-bottom:0.75rem">Add a rival</div>
         <div id="rival-msg" class="msg"></div>
@@ -254,295 +317,362 @@
         </div>
       </div>
     </div>
-
   </main>
 
   <script>
-    // ── Console paste block ──────────────────────────────────────────────────
-    (function() {
-      const WARNING = '%cStop! This is a browser feature intended for developers. If someone told you to paste something here, it is a scam and could compromise your account.';
-      const STYLE = 'color:red;font-size:18px;font-weight:bold;';
-      console.log(WARNING, STYLE);
-      // Override console to warn on devtools open detection
-      try {
-        Object.defineProperty(window, '_rr_guard', {
-          get: function() {
-            console.clear();
-            console.log(WARNING, STYLE);
-          }
-        });
-        setInterval(function(){ void _rr_guard; }, 1000);
-      } catch(e) {}
+    (function(){
+      const W='%cStop! This is a browser feature for developers. If someone told you to paste here, it is a scam.';
+      const S='color:red;font-size:18px;font-weight:bold;';
+      console.log(W,S);
     })();
 
-    const SUPABASE_URL = 'https://msmlwfnzeqndwkrkpipo.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbWx3Zm56ZXFuZHdrcmtwaXBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjE2NzksImV4cCI6MjA5ODMzNzY3OX0.bU0F3glkH4LMukxkDrLEgerjUqNIGVI77zCm9c_n6ac';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL='https://msmlwfnzeqndwkrkpipo.supabase.co';
+    const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbWx3Zm56ZXFuZHdrcmtwaXBvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjE2NzksImV4cCI6MjA5ODMzNzY3OX0.bU0F3glkH4LMukxkDrLEgerjUqNIGVI77zCm9c_n6ac';
+    const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-    let currentUser = null;
-    let currentProfile = null;
-    let refreshCooldown = false;
-    let allPriceRows = [];
+    const PAGE=100;
+    let currentUser=null;
+    let refreshCooldown=false;
+    let allSnaps=[];
+    let histMap={};
+    let wowRows=[], filteredWow=[];
+    let wowPage=1, wowTotal=1;
+    let filteredPrices=[], pricePage=1, priceTotal=1;
 
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { window.location.href = '/login.html'; return; }
-      currentUser = session.user;
-      document.getElementById('user-email').textContent = currentUser.email;
+    sb.auth.getSession().then(({data:{session}})=>{
+      if(!session){window.location.href='/login.html';return;}
+      currentUser=session.user;
+      document.getElementById('user-email').textContent=currentUser.email;
       loadDashboard();
     });
 
-    function switchTab(name) {
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + name).classList.add('active');
-      event.currentTarget.classList.add('active');
-      if (name === 'prices' && allPriceRows.length === 0) loadPrices();
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+        if(btn.dataset.tab==='prices'&&allSnaps.length===0) loadPrices();
+        if(btn.dataset.tab==='wow'&&allSnaps.length===0) loadPrices();
+      });
+    });
+
+    async function loadDashboard(){
+      await Promise.all([loadProfile(),loadRivals(),loadAlerts(),loadPrices()]);
     }
 
-    async function loadDashboard() {
-      await Promise.all([loadProfile(), loadRivals(), loadAlerts()]);
-    }
-
-    async function loadProfile() {
-      const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-      currentProfile = data;
-      const status = data?.subscription_status || 'inactive';
-      const banner = document.getElementById('status-banner');
-      const statStatus = document.getElementById('stat-status');
-      if (status === 'active') {
-        banner.className = 'status-banner active'; banner.style.display = 'flex';
-        document.getElementById('status-icon').textContent = '✅';
-        document.getElementById('status-text').textContent = 'Monitoring is active. We\'ll email you the moment a rival changes a price.';
-        statStatus.textContent = 'Active'; statStatus.style.color = 'var(--color-down)';
+    async function loadProfile(){
+      const {data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+      const status=data?.subscription_status||'inactive';
+      const banner=document.getElementById('status-banner');
+      const statStatus=document.getElementById('stat-status');
+      if(status==='active'){
+        banner.className='status-banner active';banner.style.display='flex';
+        document.getElementById('status-icon').textContent='✅';
+        document.getElementById('status-text').textContent="Monitoring is active. We'll email you when a rival changes a price.";
+        statStatus.textContent='Active';statStatus.style.color='var(--color-down)';
       } else {
-        banner.style.display = 'flex';
-        statStatus.textContent = 'Inactive'; statStatus.style.color = 'var(--color-warn)';
+        banner.style.display='flex';
+        statStatus.textContent='Inactive';statStatus.style.color='var(--color-warn)';
       }
     }
 
-    async function loadRivals() {
-      const { data } = await sb.from('rivals').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
-      document.getElementById('stat-rivals').textContent = data?.length ?? 0;
-      const container = document.getElementById('rivals-list');
-      if (!data || data.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No rivals added yet. Add your first competitor below.</p></div>`;
-        return;
+    async function loadRivals(){
+      const {data}=await sb.from('rivals').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:true});
+      document.getElementById('stat-rivals').textContent=data?.length??0;
+      const container=document.getElementById('rivals-list');
+      if(!data||!data.length){
+        container.innerHTML='<div class="empty-state"><p>No rivals added yet. Add your first competitor below.</p></div>';return;
       }
-      container.innerHTML = data.map(r => `
+      container.innerHTML=data.map(r=>`
         <div class="rival-row" id="rival-${r.id}">
-          <div>
-            <div class="rival-name">${esc(r.store_name || r.store_url)}</div>
-            <div class="rival-url">${esc(r.store_url)}</div>
-          </div>
-          <button class="rival-delete" onclick="deleteRival('${r.id}')" title="Remove rival">×</button>
+          <div><div class="rival-name">${esc(r.store_name||r.store_url)}</div><div class="rival-url">${esc(r.store_url)}</div></div>
+          <button class="rival-delete" onclick="deleteRival('${r.id}')" title="Remove">×</button>
         </div>`).join('');
     }
 
-    async function addRival() {
-      const name = document.getElementById('rival-name').value.trim();
-      const url = document.getElementById('rival-url').value.trim();
-      const msg = document.getElementById('rival-msg');
-      msg.className = 'msg';
-      if (!url) { showMsg(msg, 'Please enter a store URL.', 'error'); return; }
-      let cleanUrl = url.startsWith('http') ? url : 'https://' + url;
-      const { error } = await sb.from('rivals').insert({ user_id: currentUser.id, store_url: cleanUrl, store_name: name || cleanUrl });
-      if (error) { showMsg(msg, error.message, 'error'); return; }
-      document.getElementById('rival-name').value = '';
-      document.getElementById('rival-url').value = '';
-      showMsg(msg, 'Rival added! Hit Refresh data to scrape them now.', 'success');
+    async function addRival(){
+      const name=document.getElementById('rival-name').value.trim();
+      const url=document.getElementById('rival-url').value.trim();
+      const msg=document.getElementById('rival-msg'); msg.className='msg';
+      if(!url){showMsg(msg,'Please enter a store URL.','error');return;}
+      const cleanUrl=url.startsWith('http')?url:'https://'+url;
+      const {error}=await sb.from('rivals').insert({user_id:currentUser.id,store_url:cleanUrl,store_name:name||cleanUrl});
+      if(error){showMsg(msg,error.message,'error');return;}
+      document.getElementById('rival-name').value='';
+      document.getElementById('rival-url').value='';
+      showMsg(msg,'Rival added! Hit Refresh data to scrape them now.','success');
       loadRivals();
     }
 
-    async function deleteRival(id) {
-      if (!confirm('Remove this rival from monitoring?')) return;
-      await sb.from('rivals').delete().eq('id', id).eq('user_id', currentUser.id);
+    async function deleteRival(id){
+      if(!confirm('Remove this rival?'))return;
+      await sb.from('rivals').delete().eq('id',id).eq('user_id',currentUser.id);
       loadRivals();
     }
 
-    async function loadAlerts() {
-      const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
-      const { data } = await sb.from('alerts').select('*').eq('user_id', currentUser.id).order('detected_at', { ascending: false }).limit(50);
-      const thisMonth = (data || []).filter(a => new Date(a.detected_at) >= startOfMonth);
-      document.getElementById('stat-alerts').textContent = thisMonth.length;
-      const container = document.getElementById('alerts-container');
-      if (!data || data.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="icon">🔔</div><p>No alerts yet. They'll appear here once monitoring starts.</p></div>`;
-        return;
+    async function loadAlerts(){
+      const {data}=await sb.from('alerts').select('*').eq('user_id',currentUser.id).order('detected_at',{ascending:false}).limit(50);
+      const container=document.getElementById('alerts-container');
+      if(!data||!data.length){
+        container.innerHTML='<div class="empty-state"><p>No alerts yet — they appear once monitoring starts.</p></div>';return;
       }
-      const tagMap = { price_down: 'tag-down', price_up: 'tag-up', new_product: 'tag-new', stock_change: 'tag-inactive' };
-      const labelMap = { price_down: '↓ Price down', price_up: '↑ Price up', new_product: 'New product', stock_change: 'Stock change' };
-      container.innerHTML = `<table class="data-table"><thead><tr><th>Product</th><th>Store</th><th>Change</th><th>Price</th><th>Date</th></tr></thead><tbody>${
-        data.map(a => `<tr>
+      const tagMap={price_down:'tag-down',price_up:'tag-up',new_product:'tag-new',stock_change:'tag-neutral'};
+      const labelMap={price_down:'↓ Price drop',price_up:'↑ Price rise',new_product:'New product',stock_change:'Stock change'};
+      container.innerHTML=`<table><thead><tr><th>Product</th><th>Store</th><th>Change</th><th>Price</th><th>Detected</th></tr></thead><tbody>${
+        data.map(a=>`<tr>
           <td><strong>${esc(a.product_title||'—')}</strong></td>
-          <td>${esc(a.store_name||'—')}</td>
-          <td><span class="tag ${tagMap[a.change_type]||'tag-inactive'}">${labelMap[a.change_type]||a.change_type}</span></td>
-          <td>${a.old_price!=null?'$'+Number(a.old_price).toFixed(2)+' → ':''}${a.new_price!=null?'$'+Number(a.new_price).toFixed(2):'—'}</td>
-          <td>${formatDate(a.detected_at)}</td></tr>`).join('')
+          <td><span class="store-chip">${esc(cleanStore(a.store_name||a.store_key||'—'))}</span></td>
+          <td><span class="tag ${tagMap[a.change_type]||'tag-neutral'}">${labelMap[a.change_type]||a.change_type}</span></td>
+          <td>${a.old_price!=null?fmt$(a.old_price)+' → ':''}${a.new_price!=null?fmt$(a.new_price):'—'}</td>
+          <td style="font-size:0.8rem;color:var(--color-text-faint)">${fmtDate(a.detected_at)}</td></tr>`).join('')
       }</tbody></table>`;
     }
 
-    async function loadPrices() {
-      const tbody = document.getElementById('prices-body');
-      const avgGrid = document.getElementById('avg-grid');
-      tbody.innerHTML = `<tr><td colspan="7" class="loading" style="padding:1.5rem">Loading prices…</td></tr>`;
+    async function loadPrices(){
+      const {data:snaps,error:e1}=await sb.from('product_snapshots').select('*').limit(5000);
+      if(e1){console.error(e1);return;}
+      allSnaps=snaps||[];
 
-      // Try product_snapshots first, then latest_product_prices view
-      let { data, error } = await sb.from('product_snapshots').select('*').order('scraped_at', { ascending: false }).limit(2000);
-      if (error || !data || data.length === 0) {
-        const res2 = await sb.from('latest_product_prices').select('*').limit(2000);
-        data = res2.data || [];
+      const {data:hist}=await sb
+        .from('product_snapshot_history')
+        .select('store_key,product_handle,product_name,variant_name,price,snapshot_at')
+        .order('snapshot_at',{ascending:true})
+        .limit(10000);
+      histMap={};
+      for(const r of (hist||[])){
+        const k=rkey(r.store_key,r.product_handle,r.variant_name);
+        if(!histMap[k])histMap[k]=[];
+        histMap[k].push({price:Number(r.price),snapshot_at:r.snapshot_at});
       }
 
-      document.getElementById('stat-products').textContent = data.length.toLocaleString();
-      allPriceRows = data;
+      document.getElementById('stat-products').textContent=allSnaps.length.toLocaleString();
 
-      // Populate store filter
-      const stores = [...new Set(data.map(r => r.store_key || r.store_name || r.storekey || r.store || '').filter(Boolean))].sort();
-      const sf = document.getElementById('price-store-filter');
-      sf.innerHTML = '<option value="all">All stores</option>' + stores.map(s => `<option value="${s}">${esc(titleCase(s))}</option>`).join('');
+      // count changes
+      let changes=0;
+      for(const pts of Object.values(histMap)){
+        for(let i=1;i<pts.length;i++) if(pts[i].price!==pts[i-1].price) changes++;
+      }
+      document.getElementById('stat-changes').textContent=changes.toLocaleString();
 
-      renderAvgCards(data);
-      renderPricesTable(data);
+      // store filter options
+      const stores=[...new Set(allSnaps.map(r=>r.store_key).filter(Boolean))].sort();
+      const opts='<option value="all">All stores</option>'+stores.map(s=>`<option value="${s}">${esc(cleanStore(s))}</option>`).join('');
+      ['price-store-filter','wow-store-filter'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
 
-      // Wire up filters
-      sf.onchange = applyPriceFilters;
-      document.getElementById('price-search').oninput = applyPriceFilters;
-      document.getElementById('price-sort').onchange = applyPriceFilters;
+      filteredPrices=[...allSnaps];
+      pricePage=1;
+      renderAvgCards();
+      renderPricesTable();
+      buildWow();
     }
 
-    function renderAvgCards(rows) {
-      const avgGrid = document.getElementById('avg-grid');
-      if (!rows.length) { avgGrid.innerHTML = '<div class="loading">No price data yet — hit Refresh data first.</div>'; return; }
-
-      const byStore = {};
-      rows.forEach(r => {
-        const store = r.store_key || r.store_name || r.storekey || r.store || 'Unknown';
-        const price = parseFloat(r.price || r.current_price || r.new_price || 0);
-        if (!price) return;
-        if (!byStore[store]) byStore[store] = [];
-        byStore[store].push(price);
+    function renderAvgCards(){
+      const grid=document.getElementById('avg-grid');
+      if(!allSnaps.length){grid.innerHTML='<div class="loading">No data yet — hit Refresh data.</div>';return;}
+      const byStore={};
+      allSnaps.forEach(r=>{
+        const s=r.store_key||'unknown';
+        const p=Number(r.price||0); if(!p)return;
+        if(!byStore[s])byStore[s]=[];
+        byStore[s].push(p);
       });
-
-      const avgs = Object.entries(byStore).map(([store, prices]) => ({
-        store, avg: prices.reduce((a,b) => a+b, 0) / prices.length, count: prices.length
-      })).sort((a,b) => a.avg - b.avg);
-
-      const globalAvg = avgs.reduce((s,x) => s + x.avg, 0) / (avgs.length || 1);
-
-      avgGrid.innerHTML = avgs.map(({ store, avg, count }) => {
-        const diff = avg - globalAvg;
-        const pct = globalAvg ? ((diff / globalAvg) * 100).toFixed(1) : 0;
-        const vsClass = diff < -0.5 ? 'cheaper' : diff > 0.5 ? 'pricier' : '';
-        const vsLabel = diff < -0.5 ? `↓ ${Math.abs(pct)}% below avg` : diff > 0.5 ? `↑ ${pct}% above avg` : '≈ At market avg';
-        return `<div class="avg-card">
-          <div class="avg-store">${esc(titleCase(store))}</div>
-          <div class="avg-price">$${avg.toFixed(2)}</div>
-          <div class="avg-note">${count} products tracked</div>
-          <div class="avg-vs ${vsClass}">${vsLabel}</div>
-        </div>`;
+      const avgs=Object.entries(byStore).map(([s,ps])=>({s,avg:ps.reduce((a,b)=>a+b,0)/ps.length,count:ps.length})).sort((a,b)=>a.avg-b.avg);
+      const global=avgs.reduce((sum,x)=>sum+x.avg,0)/(avgs.length||1);
+      grid.innerHTML=avgs.map(({s,avg,count})=>{
+        const diff=avg-global; const pct=global?((diff/global)*100).toFixed(1):0;
+        const cl=diff<-0.5?'cheaper':diff>0.5?'pricier':'';
+        const label=diff<-0.5?`↓ ${Math.abs(pct)}% below avg`:diff>0.5?`↑ ${pct}% above avg`:'≈ At market avg';
+        return `<div class="avg-card"><div class="avg-store">${esc(cleanStore(s))}</div><div class="avg-price">${fmt$(avg)}</div><div class="avg-note">${count} products</div><div class="avg-vs ${cl}">${label}</div></div>`;
       }).join('');
     }
 
-    function applyPriceFilters() {
-      const store = document.getElementById('price-store-filter').value;
-      const q = document.getElementById('price-search').value.trim().toLowerCase();
-      const sort = document.getElementById('price-sort').value;
-      let rows = allPriceRows.filter(r => {
-        const s = (r.store_key || r.store_name || r.storekey || r.store || '').toLowerCase();
-        const name = (r.product_title || r.title || r.product_name || r.productname || '').toLowerCase();
-        return (store === 'all' || s === store) && (!q || name.includes(q));
-      });
-      if (sort === 'price_asc') rows.sort((a,b) => priceOf(a) - priceOf(b));
-      else if (sort === 'price_desc') rows.sort((a,b) => priceOf(b) - priceOf(a));
-      else if (sort === 'store') rows.sort((a,b) => (a.store_key||'').localeCompare(b.store_key||''));
-      else rows.sort((a,b) => (a.product_title||'').localeCompare(b.product_title||''));
-      renderPricesTable(rows);
+    function renderPricesTable(){
+      priceTotal=Math.max(1,Math.ceil(filteredPrices.length/PAGE));
+      const rows=filteredPrices.slice((pricePage-1)*PAGE,pricePage*PAGE);
+      const body=document.getElementById('prices-body');
+      if(!rows.length){body.innerHTML='<tr><td colspan="6" class="empty-state">No products found.</td></tr>';}
+      else body.innerHTML=rows.map(r=>`<tr>
+        <td><span class="store-chip">${esc(cleanStore(r.store_key||'—'))}</span></td>
+        <td><strong>${esc(r.product_name||r.product_handle||'Untitled')}</strong></td>
+        <td style="color:var(--color-text-faint);font-size:0.8rem">${esc(r.variant_name||'—')}</td>
+        <td><strong>${fmt$(r.price)}</strong></td>
+        <td style="color:var(--color-text-faint)">${r.compare_at_price?fmt$(r.compare_at_price):'—'}</td>
+        <td style="font-size:0.8rem;color:var(--color-text-faint)">${fmtDate(r.created_at)}</td>
+      </tr>`).join('');
+      document.getElementById('price-page-label').textContent=`Page ${pricePage} of ${priceTotal}`;
+      document.getElementById('price-prev').disabled=pricePage<=1;
+      document.getElementById('price-next').disabled=pricePage>=priceTotal;
     }
 
-    function priceOf(r) { return parseFloat(r.price || r.current_price || r.new_price || 0); }
-
-    function renderPricesTable(rows) {
-      const tbody = document.getElementById('prices-body');
-      if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state" style="padding:2rem"><div class="icon">📦</div><p>No products found. Run a refresh to scrape your rivals.</p></td></tr>`;
-        return;
-      }
-
-      // Compute per-store averages for "vs avg" column
-      const storeAvgs = {};
-      allPriceRows.forEach(r => {
-        const s = r.store_key || r.store_name || r.storekey || r.store || 'unknown';
-        const p = priceOf(r); if (!p) return;
-        if (!storeAvgs[s]) storeAvgs[s] = [];
-        storeAvgs[s].push(p);
+    function applyPriceFilters(){
+      const store=document.getElementById('price-store-filter').value;
+      const q=document.getElementById('price-search').value.trim().toLowerCase();
+      const sort=document.getElementById('price-sort').value;
+      let rows=allSnaps.filter(r=>{
+        const s=(r.store_key||'').toLowerCase();
+        const name=(r.product_name||r.product_handle||'').toLowerCase();
+        const vari=(r.variant_name||'').toLowerCase();
+        return(store==='all'||s===store)&&(!q||name.includes(q)||vari.includes(q));
       });
-      const avgOf = s => storeAvgs[s] ? storeAvgs[s].reduce((a,b)=>a+b,0)/storeAvgs[s].length : null;
+      if(sort==='price_asc')rows.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
+      else if(sort==='price_desc')rows.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
+      else if(sort==='store')rows.sort((a,b)=>(a.store_key||'').localeCompare(b.store_key||''));
+      else rows.sort((a,b)=>(a.product_name||'').localeCompare(b.product_name||''));
+      filteredPrices=rows; pricePage=1; renderPricesTable();
+    }
 
-      tbody.innerHTML = rows.slice(0, 500).map(r => {
-        const store = r.store_key || r.store_name || r.storekey || r.store || '—';
-        const product = r.product_title || r.title || r.product_name || r.productname || '—';
-        const variant = r.variant_title || r.variant_name || r.varianttitle || '';
-        const price = priceOf(r);
-        const avg = avgOf(store);
-        const diff = avg && price ? price - avg : null;
-        const diffLabel = diff !== null ? (diff < -0.01 ? `<span style="color:var(--color-down)">↓ $${Math.abs(diff).toFixed(2)}</span>` : diff > 0.01 ? `<span style="color:var(--color-up)">↑ $${diff.toFixed(2)}</span>` : '<span style="color:var(--color-text-faint)">—</span>') : '—';
-        const inStock = r.available !== undefined ? (r.available ? '<span class="tag tag-down">In stock</span>' : '<span class="tag tag-inactive">Out</span>') : '—';
-        const date = r.scraped_at || r.snapshot_at || r.created_at || r.recordedat || '';
+    function buildWow(){
+      wowRows=allSnaps.map(snap=>{
+        const k=rkey(snap.store_key,snap.product_handle,snap.variant_name);
+        const hist=histMap[k]||[];
+        const cur=Number(snap.price);
+        const first=hist.length?hist[0].price:null;
+        return{snap,hist,cur,first};
+      });
+      filteredWow=[...wowRows]; wowPage=1; renderWowTable();
+    }
+
+    function applyWowFilters(){
+      const store=document.getElementById('wow-store-filter').value;
+      const dir=document.getElementById('wow-dir-filter').value;
+      const q=document.getElementById('wow-search').value.trim().toLowerCase();
+      filteredWow=wowRows.filter(w=>{
+        const s=(w.snap.store_key||'').toLowerCase();
+        const name=(w.snap.product_name||w.snap.product_handle||'').toLowerCase();
+        const vari=(w.snap.variant_name||'').toLowerCase();
+        let d='flat';
+        if(w.first!==null){if(w.cur<w.first)d='drop';else if(w.cur>w.first)d='increase';}
+        return(store==='all'||s===store)&&(dir==='all'||d===dir)&&(!q||name.includes(q)||vari.includes(q)||s.includes(q));
+      });
+      wowPage=1; renderWowTable();
+    }
+
+    let _gid=0;
+    function sparkline(pts,ct){
+      if(!pts||pts.length<2)return '<span class="sparkline-none">Collecting…</span>';
+      const W=80,H=28,P=2;
+      const prices=pts.map(p=>p.price);
+      const mn=Math.min(...prices),mx=Math.max(...prices),rng=mx-mn||1;
+      const xs=pts.map((_,i)=>P+(i/(pts.length-1))*(W-P*2));
+      const ys=prices.map(p=>H-P-((p-mn)/rng)*(H-P*2));
+      const col=ct==='drop'?'var(--color-down)':ct==='increase'?'var(--color-up)':'var(--color-accent)';
+      const poly=xs.map((x,i)=>`${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+      const fill=`M${xs[0].toFixed(1)},${H} `+xs.map((x,i)=>`L${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')+` L${xs[xs.length-1].toFixed(1)},${H} Z`;
+      const gid='sg'+(++_gid);
+      return `<div class="sparkline-wrap"><svg class="sparkline-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+        <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${col}" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path d="${fill}" fill="url(#${gid})"/>
+        <polyline points="${poly}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="${xs[xs.length-1].toFixed(1)}" cy="${ys[ys.length-1].toFixed(1)}" r="2.5" fill="${col}"/>
+      </svg><span class="sparkline-label">${pts.length}pt</span></div>`;
+    }
+
+    function renderWowTable(){
+      wowTotal=Math.max(1,Math.ceil(filteredWow.length/PAGE));
+      const rows=filteredWow.slice((wowPage-1)*PAGE,wowPage*PAGE);
+      const body=document.getElementById('wow-body');
+      if(!rows.length){body.innerHTML='<tr><td colspan="8" class="empty-state">No data yet.</td></tr>';}
+      else body.innerHTML=rows.map(w=>{
+        const delta=w.first!==null?w.cur-w.first:null;
+        const pct=delta!==null&&w.first?((delta/w.first)*100).toFixed(1):null;
+        let d='flat'; if(delta!==null){if(delta<0)d='drop';else if(delta>0)d='increase';}
+        const spark=sparkline(w.hist,d);
+        const pill=delta===null?'<span class="wow-pill flat">No history</span>'
+          :delta===0?'<span class="wow-pill flat">No change</span>'
+          :`<span class="wow-pill ${d==='drop'?'down':'up'}">${d==='drop'?'▼':'▲'} ${fmt$(Math.abs(delta))}</span>`;
         return `<tr>
-          <td>${esc(titleCase(store))}</td>
-          <td><strong>${esc(product)}</strong></td>
-          <td style="color:var(--color-text-faint);font-size:0.8rem">${esc(variant)}</td>
-          <td><strong>${price ? '$'+price.toFixed(2) : '—'}</strong></td>
-          <td>${diffLabel}</td>
-          <td>${inStock}</td>
-          <td style="font-size:0.8rem;color:var(--color-text-faint)">${formatDate(date)}</td>
+          <td><span class="store-chip">${esc(cleanStore(w.snap.store_key||'—'))}</span></td>
+          <td><strong>${esc(w.snap.product_name||w.snap.product_handle||'Untitled')}</strong></td>
+          <td style="color:var(--color-text-faint);font-size:0.8rem">${esc(w.snap.variant_name||'—')}</td>
+          <td><strong>${fmt$(w.cur)}</strong></td>
+          <td style="color:var(--color-text-faint)">${w.first!==null?fmt$(w.first):'—'}</td>
+          <td>${pill}</td>
+          <td class="${d==='drop'?'price-down':d==='increase'?'price-up':''}" style="color:${d==='drop'?'var(--color-down)':d==='increase'?'var(--color-up)':'var(--color-text-faint)'}">${pct!==null?(d==='drop'?'-':d==='increase'?'+':'')+Math.abs(pct)+'%':'—'}</td>
+          <td>${spark}</td>
         </tr>`;
       }).join('');
+      document.getElementById('wow-page-label').textContent=`Page ${wowPage} of ${wowTotal}`;
+      document.getElementById('wow-prev').disabled=wowPage<=1;
+      document.getElementById('wow-next').disabled=wowPage>=wowTotal;
     }
 
-    async function triggerRefresh() {
-      if (refreshCooldown) return;
-      const btn = document.getElementById('refresh-btn');
-      const banner = document.getElementById('refresh-banner');
-      const spinner = document.getElementById('refresh-spinner');
-      const text = document.getElementById('refresh-text');
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) { window.location.href = '/login.html'; return; }
-      refreshCooldown = true; btn.disabled = true; btn.textContent = '⏳ Running…';
-      banner.className = 'refresh-banner running'; spinner.style.display = 'block';
-      text.textContent = 'Scraping your rivals now — this takes about 60 seconds…';
-      try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/trigger-scrape`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' }
+    // Filter wire-ups
+    document.getElementById('price-store-filter').addEventListener('change',applyPriceFilters);
+    document.getElementById('price-search').addEventListener('input',applyPriceFilters);
+    document.getElementById('price-sort').addEventListener('change',applyPriceFilters);
+    document.getElementById('price-prev').addEventListener('click',()=>{if(pricePage>1){pricePage--;renderPricesTable();}});
+    document.getElementById('price-next').addEventListener('click',()=>{if(pricePage<priceTotal){pricePage++;renderPricesTable();}});
+    document.getElementById('wow-store-filter').addEventListener('change',applyWowFilters);
+    document.getElementById('wow-dir-filter').addEventListener('change',applyWowFilters);
+    document.getElementById('wow-search').addEventListener('input',applyWowFilters);
+    document.getElementById('wow-clear').addEventListener('click',()=>{
+      document.getElementById('wow-store-filter').value='all';
+      document.getElementById('wow-dir-filter').value='all';
+      document.getElementById('wow-search').value='';
+      applyWowFilters();
+    });
+    document.getElementById('wow-prev').addEventListener('click',()=>{if(wowPage>1){wowPage--;renderWowTable();}});
+    document.getElementById('wow-next').addEventListener('click',()=>{if(wowPage<wowTotal){wowPage++;renderWowTable();}});
+
+    async function triggerRefresh(){
+      if(refreshCooldown)return;
+      const btn=document.getElementById('refresh-btn');
+      const banner=document.getElementById('refresh-banner');
+      const text=document.getElementById('refresh-text');
+      const {data:{session}}=await sb.auth.getSession();
+      if(!session){window.location.href='/login.html';return;}
+      refreshCooldown=true; btn.disabled=true; btn.textContent='⏳ Running…';
+      banner.className='refresh-banner running';
+      text.textContent='Scraping rivals now — takes about 60 seconds…';
+      try{
+        const res=await fetch(`${SUPABASE_URL}/functions/v1/trigger-scrape`,{
+          method:'POST',
+          headers:{'Authorization':`Bearer ${session.access_token}`,'Content-Type':'application/json'}
         });
-        const json = await res.json();
-        if (res.ok && json.success) {
-          banner.className = 'refresh-banner done'; spinner.style.display = 'none';
-          text.textContent = '✅ Scrape triggered! New data in ~60 seconds…';
-          setTimeout(() => { loadAlerts(); allPriceRows = []; if (document.getElementById('tab-prices').classList.contains('active')) loadPrices(); banner.className = 'refresh-banner'; }, 65000);
-        } else { throw new Error(json.error || 'Unknown error'); }
-      } catch(err) {
-        banner.className = 'refresh-banner error'; spinner.style.display = 'none';
-        text.textContent = '❌ Refresh failed: ' + err.message;
-        setTimeout(() => { banner.className = 'refresh-banner'; }, 8000);
+        const json=await res.json();
+        if(res.ok&&json.success){
+          banner.className='refresh-banner done';
+          text.textContent='✅ Scrape triggered! New data in ~60 seconds…';
+          setTimeout(()=>{loadAlerts();allSnaps=[];loadPrices();banner.className='refresh-banner';},65000);
+        } else throw new Error(json.error||'Unknown error');
+      } catch(err){
+        banner.className='refresh-banner error';
+        text.textContent='❌ Refresh failed: '+err.message;
+        setTimeout(()=>{banner.className='refresh-banner';},8000);
       } finally {
-        setTimeout(() => { refreshCooldown = false; btn.disabled = false; btn.textContent = '🔄 Refresh data'; }, 70000);
+        setTimeout(()=>{refreshCooldown=false;btn.disabled=false;btn.textContent='🔄 Refresh data';},70000);
       }
     }
 
-    async function signOut() { await sb.auth.signOut(); window.location.href = '/login.html'; }
+    async function signOut(){await sb.auth.signOut();window.location.href='/login.html';}
 
-    function toggleTheme() {
-      const root = document.documentElement;
-      root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    (function setupTheme(){
+      const btn=document.getElementById('theme-btn');
+      const root=document.documentElement;
+      let theme=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+      root.setAttribute('data-theme',theme);
+      function icon(m){btn.innerHTML=m==='dark'
+        ?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
+        :'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';}
+      icon(theme);
+      btn.addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';root.setAttribute('data-theme',theme);icon(theme);});
+    })();
+
+    function rkey(s,p,v){return`${s||''}||${p||''}||${v||''}`; }
+    function cleanStore(k){
+      if(!k)return'Unknown';
+      let n=k.replace(/^[0-9a-f]{8}[\s_-]+/i,'').replace(/^[0-9a-f]{6,}[\s_-]+/i,'');
+      return n.replaceAll('_',' ').replaceAll('-',' ').replace(/\b\w/g,c=>c.toUpperCase()).trim()||k;
     }
-
-    function titleCase(s) { return (s||'').replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()); }
-    function esc(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function formatDate(iso) { if(!iso) return '—'; return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
-    function showMsg(el, text, type) { el.textContent = text; el.className = 'msg ' + type; }
+    function fmt$(v){const n=Number(v);if(v===null||v===undefined||v===''||Number.isNaN(n))return'—';return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);}
+    function fmtDate(v){if(!v)return'—';const d=new Date(v);if(Number.isNaN(d.getTime()))return v;return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(d);}
+    function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    function showMsg(el,text,type){el.textContent=text;el.className='msg '+type;}
   </script>
-
 </body>
 </html>
