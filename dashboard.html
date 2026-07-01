@@ -112,6 +112,7 @@
       transition: all var(--transition);
     }
     .btn-sm:hover { background: var(--color-surface); color: var(--color-text); }
+    .btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
     .theme-toggle {
       width: 36px; height: 36px; padding: 0;
       display: inline-flex; align-items: center; justify-content: center;
@@ -134,6 +135,28 @@
     }
     .status-banner.inactive { background: var(--color-warn-bg); color: var(--color-warn); border: 1px solid var(--color-warn); }
     .status-banner.active { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); }
+
+    /* REFRESH BANNER */
+    .refresh-banner {
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .refresh-banner.running { background: var(--color-accent-light); color: var(--color-accent); border: 1px solid var(--color-accent); display: flex; }
+    .refresh-banner.done { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); display: flex; }
+    .refresh-banner.error { background: var(--color-error-bg); color: var(--color-error); border: 1px solid var(--color-error); display: flex; }
+
+    /* SPINNER */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid currentColor; border-top-color: transparent;
+      animation: spin 0.6s linear infinite; flex-shrink: 0;
+    }
 
     /* SECTION HEADER */
     .section-header {
@@ -282,6 +305,9 @@
       </a>
       <div class="nav-right">
         <span class="user-email" id="user-email"></span>
+        <button class="btn-sm" id="refresh-btn" onclick="triggerRefresh()">
+          🔄 Refresh data
+        </button>
         <button class="btn-sm" onclick="signOut()">Sign out</button>
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
@@ -296,6 +322,12 @@
     <div id="status-banner" class="status-banner inactive" style="display:none">
       <span id="status-icon">⚠️</span>
       <span id="status-text">Your subscription is inactive. <a href="/#pricing">Upgrade to activate monitoring →</a></span>
+    </div>
+
+    <!-- Refresh banner -->
+    <div id="refresh-banner" class="refresh-banner">
+      <div class="spinner" id="refresh-spinner"></div>
+      <span id="refresh-text"></span>
     </div>
 
     <!-- Stats row -->
@@ -357,6 +389,7 @@
 
     let currentUser = null;
     let currentProfile = null;
+    let refreshCooldown = false;
 
     // Auth guard
     sb.auth.getSession().then(({ data: { session } }) => {
@@ -420,7 +453,7 @@
       if (error) { showMsg(msg, error.message, 'error'); return; }
       document.getElementById('rival-name').value = '';
       document.getElementById('rival-url').value = '';
-      showMsg(msg, 'Rival added! They\'ll be included in your next monitoring run.', 'success');
+      showMsg(msg, 'Rival added! Hit Refresh data to scrape them now, or they\'ll run tonight automatically.', 'success');
       loadRivals();
     }
 
@@ -457,6 +490,66 @@
             </tr>`).join('')}
           </tbody>
         </table>`;
+    }
+
+    async function triggerRefresh() {
+      if (refreshCooldown) return;
+
+      const btn = document.getElementById('refresh-btn');
+      const banner = document.getElementById('refresh-banner');
+      const spinner = document.getElementById('refresh-spinner');
+      const text = document.getElementById('refresh-text');
+
+      // Get fresh session token
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { window.location.href = '/login.html'; return; }
+
+      // Set loading state
+      refreshCooldown = true;
+      btn.disabled = true;
+      btn.textContent = '⏳ Running...';
+      banner.className = 'refresh-banner running';
+      spinner.style.display = 'block';
+      text.textContent = 'Scraping your rivals now — this takes about 60 seconds…';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/trigger-scrape`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          banner.className = 'refresh-banner done';
+          spinner.style.display = 'none';
+          text.textContent = '✅ Scrape triggered! New data will appear in ~60 seconds. Reloading alerts…';
+          // Reload alerts after 65 seconds
+          setTimeout(() => {
+            loadAlerts();
+            banner.className = 'refresh-banner done';
+            text.textContent = '✅ Data refreshed successfully.';
+            setTimeout(() => { banner.className = 'refresh-banner'; }, 5000);
+          }, 65000);
+        } else {
+          throw new Error(json.error || 'Unknown error');
+        }
+      } catch (err) {
+        banner.className = 'refresh-banner error';
+        spinner.style.display = 'none';
+        text.textContent = '❌ Refresh failed: ' + err.message;
+        setTimeout(() => { banner.className = 'refresh-banner'; }, 8000);
+      } finally {
+        // Re-enable button after 70s cooldown (prevent spam)
+        setTimeout(() => {
+          refreshCooldown = false;
+          btn.disabled = false;
+          btn.textContent = '🔄 Refresh data';
+        }, 70000);
+      }
     }
 
     async function signOut() {
